@@ -15,29 +15,12 @@ class VehiculeRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Vehicule::class);
     }
-
-//    /**
-//     * @return Vehicule[] Returns an array of Vehicule objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('v')
-//            ->andWhere('v.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('v.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Vehicule
-//    {
-//        return $this->createQueryBuilder('v')
-//            ->andWhere('v.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findByProprietaire($proprietaire)
+    {
+        return $this->createQueryBuilder('v')
+            ->andWhere('v.proprietaire = :proprietaire')
+            ->setParameter('proprietaire', $proprietaire)
+            ->getQuery()
+            ->getResult();
+    }
 }

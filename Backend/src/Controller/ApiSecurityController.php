@@ -210,7 +210,13 @@ final class ApiSecurityController extends AbstractController
             if (isset($data['note'])) {
                 $user->setNote((float)$data['note']);
             }
-
+            if ($user->isConducteur()) {
+                $user->setIsConducteur(true);
+                $user->setRoles(['ROLE_CONDUCTEUR']);
+            } else {
+                $user->setIsConducteur(false);
+                $user->setRoles(['ROLE_USER']);
+            }
             $user->setUpdatedAt(new \DateTimeImmutable());
             $this->entityManager->flush();
 

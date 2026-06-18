@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: VehiculeRepository::class)]
 class Vehicule
@@ -15,25 +16,25 @@ class Vehicule
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
+    #[Groups(["vehicule:read"])]
     #[ORM\Column(length: 50)]
-    private ?string $NumeroImmatriculation = null;
-
+    private ?string $numeroImmatriculation = null;
+    #[Groups(["vehicule:read"])]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $dateImmatriculation = null;
-
+    private ?\DateTimeInterface $dateImmatriculation = null;
+    #[Groups(["vehicule:read"])]
     #[ORM\Column(length: 50)]
     private ?string $modele = null;
-
+    #[Groups(["vehicule:read"])]
     #[ORM\Column(length: 50)]
     private ?string $couleur = null;
-
+    #[Groups(["vehicule:read"])]
     #[ORM\Column(length: 50)]
     private ?string $marque = null;
-
+    #[Groups(["vehicule:read"])]
     #[ORM\Column(length: 50)]
     private ?string $energie = null;
-
+    #[Groups(["vehicule:read"])]
     #[ORM\ManyToOne(inversedBy: 'vehicules')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $proprietaire = null;
@@ -53,19 +54,19 @@ class Vehicule
     {
         return $this->id;
     }
-
-    public function getNumeroImmatriculation(): ?string
+    #[Groups(["vehicule:read"])]
+    public function getnumeroImmatriculation(): ?string
     {
-        return $this->NumeroImmatriculation;
+        return $this->numeroImmatriculation;
     }
 
-    public function setNumeroImmatriculation(string $NumeroImmatriculation): static
+    public function setNumeroImmatriculation(string $numeroImmatriculation): static
     {
-        $this->NumeroImmatriculation = $NumeroImmatriculation;
+        $this->numeroImmatriculation = $numeroImmatriculation;
 
         return $this;
     }
-
+    #[Groups(["vehicule:read"])]
     public function getDateImmatriculation(): ?\DateTime
     {
         return $this->dateImmatriculation;
@@ -77,7 +78,7 @@ class Vehicule
 
         return $this;
     }
-
+    #[Groups(["vehicule:read"])]
     public function getModele(): ?string
     {
         return $this->modele;
@@ -89,7 +90,7 @@ class Vehicule
 
         return $this;
     }
-
+    #[Groups(["vehicule:read"])]
     public function getCouleur(): ?string
     {
         return $this->couleur;
@@ -101,7 +102,7 @@ class Vehicule
 
         return $this;
     }
-
+    #[Groups(["vehicule:read"])]
     public function getMarque(): ?string
     {
         return $this->marque;
