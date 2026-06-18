@@ -20,6 +20,8 @@ use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
+
+
 #[Route('/api', name: 'app_api_')]
 final class ApiSecurityController extends AbstractController
 {
@@ -53,7 +55,7 @@ final class ApiSecurityController extends AbstractController
             description: "Erreur de validation"
         )
     ]
-)]
+    )]
     public function register(Request $request): JsonResponse
     {
             $data = json_decode($request->getContent(), true);
@@ -70,6 +72,7 @@ final class ApiSecurityController extends AbstractController
             $hashedPassword = $this->hasher->hashPassword($user, $data['password']);
             $user->setPassword($hashedPassword);
             $user->setPseudo($data['pseudo'] ?? null);
+            $user->setApiToken(bin2hex(random_bytes(32)));
             if (isset($data['isConducteur'])) {
                 $user->setIsConducteur((bool)$data['isConducteur'] ?? false);
             }
@@ -216,4 +219,45 @@ final class ApiSecurityController extends AbstractController
             return new JsonResponse(['error' => 'Erreur lors de la lecture des données JSON'], Response::HTTP_BAD_REQUEST);
         }
     }
+    #[Route('/user/{email}', name: 'get_user_by_email', methods: ['GET'])]
+    #[OA\Get(
+        summary: "Récupération des informations d'un utilisateur par son email",
+        parameters: [
+            new OA\Parameter(
+                name: "email",
+                in: "path",
+                required: true,
+                description: "Email de l'utilisateur",
+                schema: new OA\Schema(type: "string")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Informations de l'utilisateur"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Utilisateur non trouvé"
+            )
+        ]
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function getUserByEmail(string $email): JsonResponse
+    {
+        $user = $this->entityManager->getRepository(User::class)->findByEmail($email);
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'pseudo' => $user->getPseudo(),
+            'roles' => $user->getRoles(),
+            'isConducteur' => $user->isConducteur(),
+            'isPassager' => $user->isPassager(),
+        ]);
+    }
+
 }

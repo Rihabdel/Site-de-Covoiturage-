@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -17,9 +18,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
+    #[Groups(['user:read'])]
     #[ORM\Column]
     private ?int $id = null;
-
+    #[Groups(['user:read', 'user:write'])]
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
@@ -37,34 +39,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $nom = null;
-    #[Groups(['create', 'update', 'read', 'default'])]
+    #[Groups(['user:read', 'user:write', 'user:update'])]
     #[Assert\NotBlank(message: 'Le pseudo est obligatoire.', groups: ['create', 'update'])]
     #[ORM\Column(length: 50)]
     private ?string $pseudo = null;
-
+    #[Groups(['user:read', 'user:update'])]
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $prenom = null;
-
+    #[Groups(['user:read', 'user:update'])]
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $dateNaissance = null;
-
+    #[Groups(['user:read','user:write','user:update'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
-
+    #[Groups(['user:read', 'user:update'])]
     #[ORM\Column(nullable: true)]
     private ?int $credits = null;
-
+    #[Groups(['user:read', 'user:update'])]
     #[ORM\Column(nullable: true)]
     private ?int $telephone = null;
-
+    #[Groups(['user:read', 'user:update'])]
     #[ORM\Column]
     private ?bool $isConducteur = null;
-
+    #[Groups(['user:read', 'user:update'])]
     #[ORM\Column]
     private ?bool $isPassager = null;
 
     /**
      * @var Collection<int, Vehicule>
+     * @Groups(['user:read'])
      */
     #[ORM\OneToMany(targetEntity: Vehicule::class, mappedBy: 'proprietaire')]
     private Collection $vehicules;
