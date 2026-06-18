@@ -37,7 +37,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $nom = null;
-
+    #[Groups(['create', 'update', 'read', 'default'])]
+    #[Assert\NotBlank(message: 'Le pseudo est obligatoire.', groups: ['create', 'update'])]
     #[ORM\Column(length: 50)]
     private ?string $pseudo = null;
 
@@ -85,6 +86,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\OneToMany(targetEntity: Avis::class, mappedBy: 'auteur')]
     private Collection $avis;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $apiToken = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt;
 
     public function __construct()
     {
@@ -396,6 +406,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $avi->setAuteur(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(?string $apiToken): static
+    {
+        $this->apiToken = $apiToken;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

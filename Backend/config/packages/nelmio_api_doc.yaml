@@ -1,0 +1,27 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: "Ecoride API"
+            description: "API de covoiturage"
+            version: "1.0.0"
+        components:
+            securitySchemes:
+                ApiToken:
+                    type: apiKey
+                    in: header
+                    name: X-AUTH-TOKEN
+
+        security:
+            - ApiToken: []
+    areas:
+        default:
+            path_patterns:
+                - ^/api(?!/doc$)
+        public:
+            path_patterns:
+                - ^/api/public
+
+        private:
+            path_patterns:
+                - ^/api/admin
+                - ^/api/user
