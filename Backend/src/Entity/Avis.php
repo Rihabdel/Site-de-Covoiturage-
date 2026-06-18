@@ -23,6 +23,14 @@ class Avis
     #[ORM\Column(length: 50)]
     private ?string $statutAvis = null;
 
+    #[ORM\ManyToOne(inversedBy: 'avis')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $auteur = null;
+
+    #[ORM\ManyToOne(inversedBy: 'avis')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Covoiturage $covoiturage = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +68,30 @@ class Avis
     public function setStatutAvis(string $statutAvis): static
     {
         $this->statutAvis = $statutAvis;
+
+        return $this;
+    }
+
+    public function getAuteur(): ?User
+    {
+        return $this->auteur;
+    }
+
+    public function setAuteur(?User $auteur): static
+    {
+        $this->auteur = $auteur;
+
+        return $this;
+    }
+
+    public function getCovoiturage(): ?Covoiturage
+    {
+        return $this->covoiturage;
+    }
+
+    public function setCovoiturage(?Covoiturage $covoiturage): static
+    {
+        $this->covoiturage = $covoiturage;
 
         return $this;
     }

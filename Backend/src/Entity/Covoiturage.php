@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CovoiturageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CovoiturageRepository::class)]
@@ -36,6 +38,32 @@ class Covoiturage
 
     #[ORM\Column(length: 50)]
     private ?string $statut = null;
+
+    #[ORM\ManyToOne(inversedBy: 'trajetsProposes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $chauffeur = null;
+
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'trajetsParticipes')]
+    private Collection $passagers;
+
+    #[ORM\ManyToOne(inversedBy: 'covoiturages')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Vehicule $vehicule = null;
+
+    /**
+     * @var Collection<int, Avis>
+     */
+    #[ORM\OneToMany(targetEntity: Avis::class, mappedBy: 'covoiturage')]
+    private Collection $avis;
+
+    public function __construct()
+    {
+        $this->passagers = new ArrayCollection();
+        $this->avis = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -134,6 +162,84 @@ class Covoiturage
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getChauffeur(): ?User
+    {
+        return $this->chauffeur;
+    }
+
+    public function setChauffeur(?User $chauffeur): static
+    {
+        $this->chauffeur = $chauffeur;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getPassagers(): Collection
+    {
+        return $this->passagers;
+    }
+
+    public function addPassager(User $passager): static
+    {
+        if (!$this->passagers->contains($passager)) {
+            $this->passagers->add($passager);
+        }
+
+        return $this;
+    }
+
+    public function removePassager(User $passager): static
+    {
+        $this->passagers->removeElement($passager);
+
+        return $this;
+    }
+
+    public function getVehicule(): ?Vehicule
+    {
+        return $this->vehicule;
+    }
+
+    public function setVehicule(?Vehicule $vehicule): static
+    {
+        $this->vehicule = $vehicule;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Avis>
+     */
+    public function getAvis(): Collection
+    {
+        return $this->avis;
+    }
+
+    public function addAvi(Avis $avi): static
+    {
+        if (!$this->avis->contains($avi)) {
+            $this->avis->add($avi);
+            $avi->setCovoiturage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAvi(Avis $avi): static
+    {
+        if ($this->avis->removeElement($avi)) {
+            // set the owning side to null (unless already changed)
+            if ($avi->getCovoiturage() === $this) {
+                $avi->setCovoiturage(null);
+            }
+        }
 
         return $this;
     }

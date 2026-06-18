@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -59,6 +61,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?bool $isPassager = null;
+
+    /**
+     * @var Collection<int, Vehicule>
+     */
+    #[ORM\OneToMany(targetEntity: Vehicule::class, mappedBy: 'proprietaire')]
+    private Collection $vehicules;
+
+    /**
+     * @var Collection<int, Covoiturage>
+     */
+    #[ORM\OneToMany(targetEntity: Covoiturage::class, mappedBy: 'chauffeur')]
+    private Collection $trajetsProposes;
+
+    /**
+     * @var Collection<int, Covoiturage>
+     */
+    #[ORM\ManyToMany(targetEntity: Covoiturage::class, mappedBy: 'passagers')]
+    private Collection $trajetsParticipes;
+
+    /**
+     * @var Collection<int, Avis>
+     */
+    #[ORM\OneToMany(targetEntity: Avis::class, mappedBy: 'auteur')]
+    private Collection $avis;
+
+    public function __construct()
+    {
+        $this->vehicules = new ArrayCollection();
+        $this->trajetsProposes = new ArrayCollection();
+        $this->trajetsParticipes = new ArrayCollection();
+        $this->avis = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -245,6 +279,123 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsPassager(bool $isPassager): static
     {
         $this->isPassager = $isPassager;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Vehicule>
+     */
+    public function getVehicules(): Collection
+    {
+        return $this->vehicules;
+    }
+
+    public function addVehicule(Vehicule $vehicule): static
+    {
+        if (!$this->vehicules->contains($vehicule)) {
+            $this->vehicules->add($vehicule);
+            $vehicule->setProprietaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVehicule(Vehicule $vehicule): static
+    {
+        if ($this->vehicules->removeElement($vehicule)) {
+            // set the owning side to null (unless already changed)
+            if ($vehicule->getProprietaire() === $this) {
+                $vehicule->setProprietaire(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Covoiturage>
+     */
+    public function getTrajetsProposes(): Collection
+    {
+        return $this->trajetsProposes;
+    }
+
+    public function addTrajetsPropose(Covoiturage $trajetsPropose): static
+    {
+        if (!$this->trajetsProposes->contains($trajetsPropose)) {
+            $this->trajetsProposes->add($trajetsPropose);
+            $trajetsPropose->setChauffeur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrajetsPropose(Covoiturage $trajetsPropose): static
+    {
+        if ($this->trajetsProposes->removeElement($trajetsPropose)) {
+            // set the owning side to null (unless already changed)
+            if ($trajetsPropose->getChauffeur() === $this) {
+                $trajetsPropose->setChauffeur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Covoiturage>
+     */
+    public function getTrajetsParticipes(): Collection
+    {
+        return $this->trajetsParticipes;
+    }
+
+    public function addTrajetsParticipe(Covoiturage $trajetsParticipe): static
+    {
+        if (!$this->trajetsParticipes->contains($trajetsParticipe)) {
+            $this->trajetsParticipes->add($trajetsParticipe);
+            $trajetsParticipe->addPassager($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrajetsParticipe(Covoiturage $trajetsParticipe): static
+    {
+        if ($this->trajetsParticipes->removeElement($trajetsParticipe)) {
+            $trajetsParticipe->removePassager($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Avis>
+     */
+    public function getAvis(): Collection
+    {
+        return $this->avis;
+    }
+
+    public function addAvi(Avis $avi): static
+    {
+        if (!$this->avis->contains($avi)) {
+            $this->avis->add($avi);
+            $avi->setAuteur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAvi(Avis $avi): static
+    {
+        if ($this->avis->removeElement($avi)) {
+            // set the owning side to null (unless already changed)
+            if ($avi->getAuteur() === $this) {
+                $avi->setAuteur(null);
+            }
+        }
 
         return $this;
     }
