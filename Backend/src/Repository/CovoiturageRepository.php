@@ -15,29 +15,52 @@ class CovoiturageRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Covoiturage::class);
     }
+    public  function findAllWithAvailableSeats(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.placesDisponibles > 0')
+            ->getQuery()
+            ->getResult();
+    }
+    public function findByFilters(array $filters): array
+    {
+        $qb = $this->createQueryBuilder('c');
 
-//    /**
-//     * @return Covoiturage[] Returns an array of Covoiturage objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+        if (!empty($filters['prixMax'])) {
+            $qb->andWhere('c.prix <= :prixMax')
+            ->setParameter('prixMax', $filters['prixMax']);
+        }
 
-//    public function findOneBySomeField($value): ?Covoiturage
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if (!empty($filters['dureeMax'])) {
+            $qb->andWhere('c.dateArrivee - c.dateDepart <= :dureeMax')
+            ->setParameter('dureeMax', $filters['dureeMax']);
+        }
+
+        if (isset($filters['ecologique'])) {
+            $qb->andWhere('c.voyageEcologique = :eco')
+            ->setParameter('eco', $filters['ecologique']);
+        }
+
+        return $qb->getQuery()->getResult();
+}
+    public function findByMinDriverNote(float $note): array
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.chauffeur', 'u')
+            ->where('u.note >= :note')
+            ->setParameter('note', $note)
+            ->getQuery()
+            ->getResult();
+    }
+    public function duree(Covoiturage $covoiturage): ?\DateInterval
+    {
+        $dateDepart = $covoiturage->getDateDepart();
+        $dateArrivee = $covoiturage->getDateArrivee();
+
+        if ($dateDepart && $dateArrivee) {
+            return $dateDepart->diff($dateArrivee);
+        }
+        return null;
+    }
+    //change statut du covoiturage par le chauffeur
 }

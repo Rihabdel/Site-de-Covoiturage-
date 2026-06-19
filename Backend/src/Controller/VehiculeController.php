@@ -13,6 +13,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
 
+
 #[Route('/api/vehicule', name: 'app_api_')]
 class VehiculeController extends AbstractController
 {

@@ -40,6 +40,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getOneOrNullResult();
     }
+    public function findByMinNote(float $minNote): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.note >= :note')
+            ->setParameter('note', $minNote)
+            ->getQuery()
+            ->getResult();
+    }
    
 }
    

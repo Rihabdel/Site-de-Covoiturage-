@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Entity;
-
+use App\Enum\Statut;
 use App\Repository\CovoiturageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -36,8 +36,8 @@ class Covoiturage
     #[ORM\Column]
     private ?bool $voyageEcologique = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $statut = null;
+    #[ORM\Column(type: 'string', enumType: Statut::class)]
+    private ?Statut $statut =  Statut::PENDING;
 
     #[ORM\ManyToOne(inversedBy: 'trajetsProposes')]
     #[ORM\JoinColumn(nullable: false)]
@@ -58,6 +58,9 @@ class Covoiturage
      */
     #[ORM\OneToMany(targetEntity: Avis::class, mappedBy: 'covoiturage')]
     private Collection $avis;
+
+    #[ORM\OneToOne(mappedBy: 'covoiturage', cascade: ['persist', 'remove'])]
+    private ?Trajet $trajet = null;
 
     public function __construct()
     {
@@ -154,12 +157,12 @@ class Covoiturage
         return $this;
     }
 
-    public function getStatut(): ?string
+    public function getStatut(): ?Statut
     {
         return $this->statut;
     }
 
-    public function setStatut(string $statut): static
+    public function setStatut(Statut $statut): static
     {
         $this->statut = $statut;
 
@@ -240,6 +243,23 @@ class Covoiturage
                 $avi->setCovoiturage(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTrajet(): ?Trajet
+    {
+        return $this->trajet;
+    }
+
+    public function setTrajet(Trajet $trajet): static
+    {
+        // set the owning side of the relation if necessary
+        if ($trajet->getCovoiturage() !== $this) {
+            $trajet->setCovoiturage($this);
+        }
+
+        $this->trajet = $trajet;
 
         return $this;
     }
