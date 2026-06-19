@@ -95,4 +95,9 @@ class Avis
 
         return $this;
     }
+    public function isValidated(): bool
+    {
+        return $this->statutAvis === 'validé';
+    }
+    
 }

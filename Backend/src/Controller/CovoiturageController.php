@@ -418,7 +418,7 @@ final class CovoiturageController extends AbstractController
         
         
         // Créer un nouvel objet Covoiturage et définir ses propriétés
-        ;
+        
         $dateDepart = new \DateTime($data['dateDepart']);
         $dateArrivee = new \DateTime($data['dateArrivee']);
 
