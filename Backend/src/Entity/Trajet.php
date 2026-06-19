@@ -37,11 +37,8 @@ class Trajet
     #[ORM\Column(nullable: true)]
     private ?int $duree = null;
 
-    #[ORM\OneToOne(inversedBy: 'trajet', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?covoiturage $covoiturage = null;
-
-   
+    #[ORM\OneToOne(mappedBy: 'trajet')]
+    private ?Covoiturage $covoiturage = null;
     public function getId(): ?int
     {
         return $this->id;
@@ -142,18 +139,19 @@ class Trajet
 
         return $this;
     }
+    
 
-    public function getCovoiturage(): ?covoiturage
-    {
-        return $this->covoiturage;
-    }
+public function getCovoiturage(): ?Covoiturage
+{
+    return $this->covoiturage;
+}
 
-    public function setCovoiturage(covoiturage $covoiturage): static
-    {
-        $this->covoiturage = $covoiturage;
+public function setCovoiturage(?Covoiturage $covoiturage): static
+{
+    $this->covoiturage = $covoiturage;
 
-        return $this;
-    }
+    return $this;
+}
 
 
 }
