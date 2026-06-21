@@ -164,7 +164,7 @@ final class CovoiturageController extends AbstractController
             'nombrePlace' => $covoiturage->getNombrePlace(),
             'vehicule' => $covoiturage->getVehicule()->getMarque() . ' ' . $covoiturage->getVehicule()->getModele().' ' . $covoiturage->getVehicule()->getCouleur(),
             'immatriculation' => $covoiturage->getVehicule()->getNumeroImmatriculation().' ' . $covoiturage->getVehicule()->getDateImmatriculation()->format('Y-m-d'),
-            'energie' => $covoiturage->getVehicule()->getEnergie(),
+            'energie' => $covoiturage->getvOYAGEcologique() ? 'Ecologique' : 'Non écologique',
             'age' => $age->y,
             'dateDepart' => $covoiturage->getDate()->format('Y-m-d'),
             'heureDepart' => $covoiturage->getHeure()->format('H:i:s'),
@@ -197,10 +197,8 @@ final class CovoiturageController extends AbstractController
     #[Groups(['covoiturage:read'])]
     public function getMyCovoiturages(): Response
     {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->json(['message' => 'Unauthorized'], 401);
-        }
+        $user = $this->getChauffeur();
+        
         $covoiturages = $this->covoiturageRepository->findBy(['user' => $user]);
         return $this->json($covoiturages, 200, [], ['groups' => 'covoiturage:read']);
     }
@@ -319,7 +317,7 @@ final class CovoiturageController extends AbstractController
         response: 500,
         description: "Erreur lors de la suppression du covoiturage"
     )]
-    #[IsGranted('ROLE_USER', message: 'Seul le chauffeur peut supprimer le covoiturage')]
+    #[IsGranted('ROLE_CONDUCTEUR', message: 'Seul le chauffeur peut supprimer le covoiturage')]
     public function delete(int $id): JsonResponse
     {
         $covoiturage = $this->covoiturageRepository->find($id);
@@ -432,7 +430,14 @@ final class CovoiturageController extends AbstractController
                 'message' => 'Le nombre de places doit être supérieur à 0'
             ], 400);
         }
-        
+        $credit = $credit -2;
+        if ($credit < 0) {
+            return $this->json([
+                'message' => 'Vous n\'avez pas assez de crédits pour créer un covoiturage. Il vous faut au moins 2 crédits.'
+            ], 400);
+        }
+        $user->setCredit($credit);
+        $em->persist($user);
         $covoiturageData = new Covoiturage();
         $covoiturageData->setChauffeur($user);
         $covoiturageData->setDateDepart($dateDepart);
