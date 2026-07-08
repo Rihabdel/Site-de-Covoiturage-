@@ -1,0 +1,56 @@
+services:
+
+  api:
+    build: ./Backend
+    container_name: Ecoride_symfony_back
+    ports:
+      - "8000:80"
+    volumes:
+      - ./Backend:/var/www/html
+      - symfony_var:/var/www/html/var
+      - symfony_vendor:/var/www/html/vendor
+    depends_on:
+      - database
+  frontend:
+    build: ./FrontendBootstrap
+    container_name: Ecoride_bootstrap_front
+    ports:
+      - "5173:5173"
+    tty: true  
+    volumes:
+      - ./FrontendBootstrap:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    command: npm run dev -- --host 
+    depends_on:
+      - api
+  database:
+    image: postgres:16-alpine
+    container_name: ecoride_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: ecoride_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    container_name: ecoride_pma
+#    ports:
+#      - "8081:80"
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: user@domain.com
+#      PGADMIN_DEFAULT_PASSWORD: password
+#    depends_on:
+#      - database
+
+volumes:
+  symfony_var:
+  symfony_vendor:
+  db_data:

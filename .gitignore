@@ -1,0 +1,14 @@
+# Symfony
+/Backend/.env.local
+/Backend/var/
+/Backend/vendor/
+
+# Cache Nelmio / Swagger généré
+/Backend/public/bundles/
+
+# Logs
+*.log
+
+# Node
+node_modules/
+dist/
