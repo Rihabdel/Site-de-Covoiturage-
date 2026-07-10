@@ -1,0 +1,15 @@
+RewriteEngine On
+RewriteBase /
+
+# API routes → index.php
+
+RewriteRule ^api/.\*$ /index.php [L]
+
+# Fichiers existants → servir directement
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Tout le reste → index.html
+
+RewriteRule ^ /index.html [L]

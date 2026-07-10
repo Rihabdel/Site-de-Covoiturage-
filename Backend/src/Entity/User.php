@@ -36,19 +36,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
-
+    #[Groups(['user:read', 'user:write', 'user:update'])]
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $nom = null;
     #[Groups(['user:read', 'user:write', 'user:update'])]
     #[Assert\NotBlank(message: 'Le pseudo est obligatoire.', groups: ['create', 'update'])]
     #[ORM\Column(length: 50)]
     private ?string $pseudo = null;
-    #[Groups(['user:read', 'user:update'])]
+    #[Groups(['user:read', 'user:write', 'user:update'])]
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $prenom = null;
     #[Groups(['user:read', 'user:update'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $dateNaissance = null;
+   #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateNaissance = null;
     #[Groups(['user:read','user:write','user:update'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
@@ -227,12 +227,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getDateNaissance(): ?\DateTime
+    public function getDateNaissance(): ?\DateTimeInterface
     {
         return $this->dateNaissance;
     }
 
-    public function setDateNaissance(?\DateTime $dateNaissance): static
+    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
     {
         $this->dateNaissance = $dateNaissance;
 

@@ -1,0 +1,508 @@
+<div class="container mb-5">
+    <div class="user-header">
+        <div class="row align-items-center" id="user-header">
+            
+                // Le contenu du USER sera chargé ici via JavaScript
+            
+        </div>
+    </div>
+
+    <div class="row profil-container-fluid">
+        <!-- Sidebar -->
+        <div class="col-12 col-md-3 col-lg-2 mb-3">
+                <div class="nav nav-pills me-3 flex-md-column flex-row sidebar" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                        <button class="nav-link active" id="v-pills-profil-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profil" type="button" role="tab" aria-controls="v-pills-profil" aria-selected="true">Profil</button>
+                        <button class="nav-link" id="v-pills-vehicules-tab" data-bs-toggle="pill" data-bs-target="#v-pills-vehicules" type="button" role="tab" aria-controls="v-pills-vehicules" aria-selected="false">Véhicules</button>
+                        <button class="nav-link" id="v-pills-preferences-tab" data-bs-toggle="pill" data-bs-target="#v-pills-preferences" type="button" role="tab" aria-controls="v-pills-preferences" aria-selected="false">Préférences</button>
+                        <button class="nav-link" id="v-pills-trajets-tab" data-bs-toggle="pill" data-bs-target="#v-pills-trajets" type="button" role="tab" aria-controls="v-pills-trajets" aria-selected="false">Trajets</button>
+                        <button class="nav-link" id="v-pills-historique-tab" data-bs-toggle="pill" data-bs-target="#v-pills-historique" type="button" role="tab" aria-controls="v-pills-historique" aria-selected="false">Historique</button>
+                        <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</button>
+                </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="tab-content col-12 col-md-9 col-lg-10" id="v-pills-tabContent">
+                    
+                    <!-- Onglet Profil -->
+                    <div class="tab-pane fade show active" id="v-pills-profil" role="tabpanel" aria-labelledby="v-pills-profil-tab" tabindex="0">
+                      <div id ="profileCard">
+                        <!-- Le contenu du profil sera chargé ici via JavaScript --> 
+                      <div id="profileHeader">
+                        <!-- Le contenu du profil sera chargé ici via JavaScript -->
+                      </div>
+                      <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-user-circle me-2"></i> Informations personnelles
+                                    </div>
+                                    <div class="card-body" id="profileInfo">
+                                       // Le contenu du profil sera chargé ici via JavaScript
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-tasks me-2"></i> Statut
+                                    </div>
+                                    <div class="card-body" id="statusUser">
+                                        <div class="mb-3">
+                <span class="role-badge badge-driver"><i class="fas fa-car me-1"></i> Conducteur</span>
+                <span class="role-badge badge-passenger"><i class="fas fa-user me-1"></i> Passager</span>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="editIsPassager" name="isPassager">
+                <label class="form-check-label" for="editIsPassager">Passager</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="editIsConducteur" name="isConducteur">
+                 <label class="form-check-label" for="editIsConducteur">Conducteur</label>
+            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="justify-content-between mt-4">
+                            <button class="btn btn-primary" id="editProfileBtn">Modifier le profil</button>
+                            <button class="btn btn-secondary" id="changePasswordBtn">Changer le mot de passe</button>
+                            <button class="btn btn-danger" id="deleteAccountBtn">Supprimer le compte</button>
+                        </div>
+                    </div>
+                    <!-- Modal pour la modification du profil -->
+                    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editProfileModalLabel">Modifier le profil</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                   <form id="editProfileForm">
+                        <div class="mb-3">
+                            <label class="form-label">Pseudo</label>
+                            <input type="text" class="form-control" id="editPseudo" name="pseudo" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="editNom" name="nom">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="editPrenom" name="prenom">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Date de naissance</label>
+                            <input type="date" class="form-control" id="editDateDeNaissance" name="dateDeNaissance">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Numéro de téléphone</label>
+                            <input type="tel" class="form-control" id="editNumeroTelephone" name="numeroTelephone">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                    <!-- modal changement de mot de passe -->
+                    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="changePasswordModalLabel">Changer le mot de passe</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <form id="PasswordUpdateForm">
+                              <div class="mb-3">
+                                <label for="currentPassword" class="form-label">Mot de passe actuel</label>
+                                <input type="password" class="form-control" id="currentPassword" required name="currentPassword">
+                              </div>
+                              <div class="mb-3">
+                                <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+                                <input type="password" class="form-control" id="newPassword" required name="newPassword">
+                              </div>
+                              <div class="mb-3">
+                                <label for="confirmNewPassword" class="form-label">Confirmer le nouveau mot de passe</label>
+                                <input type="password" class="form-control" id="confirmNewPassword" required name="confirmNewPassword">
+                              </div>
+                              <button type="submit" id="updatePasswordButton" class="btn btn-primary">Mettre à jour le mot de passe</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!--delete account modal -->
+                      <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="deleteAccountModalLabel">Supprimer le compte</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <p>Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.</p>
+                              <button type="button"  class="btn btn-danger" id="confirmDeleteAccount">Supprimer le compte</button>
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Onglet Véhicules -->
+                    <div class="tab-pane fade" id="v-pills-vehicules" role="tabpanel" aria-labelledby="v-pills-vehicules-tab" tabindex="0">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> En tant que conducteur, vous devez renseigner au moins un véhicule pour proposer des trajets.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="card vehicle-card">
+                                    <div class="card-body" id="vehiculeCard">
+                                        <!-- Les informations du véhicule seront chargées ici via JavaScript -->
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <button class="btn btn-outline-primary btn-sm" id="editVehiculeBtn">
+                                            <i class="fas fa-edit"></i> Modifier
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" id="deleteVehiculeBtn">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <div class="card-body text-center d-flex align-items-center justify-content-center" style="min-height: 200px;">
+                                        <div>
+                                            <i class="fas fa-plus-circle fa-3x text-muted mb-3"></i>
+                                            <p>Ajouter un véhicule</p>
+                                            <button class="btn btn-primary" id="addVehiculeBtn">Nouveau véhicule</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                              <!-- Modal pour l'ajout d'un véhicule -->
+                            <div class="modal fade" id="addVehiculeModal" tabindex="-1" aria-labelledby="addVehiculeModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="addVehiculeModalLabel">Ajouter un véhicule</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="addVehiculeForm">
+                                                    <div class="mb-3">
+                                                        <label for="vehiculeMarque" class="form-label">Marque</label>
+                                                        <input type="text" class="form-control" id="vehiculeMarque" name="marque" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="vehiculeModele" class="form-label">Modèle</label>
+                                                        <input type="text" class="form-control" id="vehiculeModele" name="modele" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="vehiculeEnergie" class="form-label">Energie</label>
+                                                        <input type="text" class="form-control" id="vehiculeEnergie" name="energie" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="vehiculeCouleur" class="form-label">Couleur</label>
+                                                        <input type="text" class="form-control" id="vehiculeCouleur" name="couleur" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="vehiculeDateImmatriculation" class="form-label">Date de première mise en circulation</label>
+                                                        <input type="date" class="form-control" id="vehiculeDateImmatriculation" name="dateImmatriculation" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="vehiculeNumeroImmatriculation" class="form-label">Numéro d'immatriculation</label>
+                                                        <input type="number" class="form-control" id="vehiculeNumeroImmatriculation" name="NumeroImmatriculation" required min="1">
+                                                    </div>
+                                                    
+                                                    <button type="submit" class="btn btn-primary">Ajouter le véhicule</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                            <!-- Modal pour la modification d'un véhicule -->
+                            <div class="modal fade" id="editVehiculeModal" tabindex="-1" aria-labelledby="editVehiculeModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editVehiculeModalLabel">Modifier le véhicule</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="editVehiculeForm">
+                                                <div class="mb-3">
+                                                    <label for="editVehiculeMarque" class="form-label">Marque</label>
+                                                    <input type="text" class="form-control" id="editVehiculeMarque" name="marque" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="editVehiculeModele" class="form-label">Modèle</label>
+                                                    <input type="text" class="form-control" id="editVehiculeModele" name="modele" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="editVehiculeEnergie" class="form-label">Energie</label>
+                                                    <input type="text" class="form-control" id="editVehiculeEnergie" name="energie" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="editVehiculeCouleur" class="form-label">Couleur</label>
+                                                    <input type="text" class="form-control" id="editVehiculeCouleur" name="couleur" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="editVehiculeDateImmatriculation" class="form-label">Date de première mise en circulation</label>
+                                                    <input type="date" class="form-control" id="editVehiculeDateImmatriculation" name="dateImmatriculation" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="editVehiculeNumeroImmatriculation" class="form-label">Numéro d'immatriculation</label>
+                                                    <input type="number" class="form-control" id="editVehiculeNumeroImmatriculation" name="NumeroImmatriculation" required min="1">
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                                            </form>
+                                        </div>  
+                                    </div> 
+                                </div>
+                            </div>
+                            <!--Modal de suppression de véhicule-->
+                            <div class="modal fade" id="deleteVehiculeModal" tabindex="-1" aria-labelledby="deleteVehiculeModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteVehiculeModalLabel">Supprimer le véhicule</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                            <button type="button" class="btn btn-danger" id="confirmDeleteVehiculeBtn">Supprimer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                  </div>
+                    <!-- Onglet Trajets -->
+                    <div class="tab-pane fade" id="v-pills-trajets" role="tabpanel" aria-labelledby="v-pills-trajets-tab" tabindex="0">
+                        <h3 class="section-title">Mes trajets</h3>
+                        <ul class="nav nav-tabs" id="myTripsTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab">Proposer un trajet</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="planned-tab" data-bs-toggle="tab" data-bs-target="#planned" type="button" role="tab">Planifiés</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="inprogress-tab" data-bs-toggle="tab" data-bs-target="#inprogress" type="button" role="tab">En cours</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content mt-4" id="myTripsTabContent">
+                            <!-- Trajets Planifiés -->
+                            <div class="tab-pane fade" id="planned" role="tabpanel">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <h5>Trajet :</h5>
+                                                <p class="mb-1"><i class="far fa-calendar me-2"></i> Date :</p>
+                                                <p class="mb-1"><i class="fas fa-car me-2"></i> Véhicule :</p>
+                                                <p class="mb-0"><i class="fas fa-users me-2"></i> Places disponibles :</p>
+                                                <p class="mb-0"><i class="fas fa-euro-sign me-2"></i> Prix par passager :</p>
+                                            </div>
+                                            <div class="col-md-4 text-md-end">
+                                                <p><span class="trip-status status-planned">Planifié</span></p>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-primary btn-sm">Démarrer</button>
+                                                    <button class="btn btn-outline-danger btn-sm">Annuler</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Trajets En cours -->
+                            <div class="tab-pane fade" id="inprogress" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <h5>Trajet :</h5>
+                                                <p class="mb-1"><i class="far fa-calendar me-2"></i> Date :</p>
+                                                <p class="mb-1"><i class="fas fa-car me-2"></i> Véhicule :</p>
+                                                <p class="mb-0"><i class="fas fa-users me-2"></i> Passagers à bord :</p>
+                                            </div>
+                                            <div class="col-md-4 text-md-end">
+                                                <span class="trip-status status-in-progress">En cours</span>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-success btn-sm">Arrivée à destination</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Proposer un trajet -->
+                            <div class="tab-pane fade show active" id="create" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-plus-circle me-2"></i> Proposer un nouveau trajet
+                                    </div>
+                                    <div class="card-body">
+                                        <form action="proposer_trajet.php" method="POST">
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="adresse_depart" class="form-label">Lieu de départ</label>
+                                                    <input type="text" class="form-control" id="adresse_depart" placeholder="Ville de départ">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="adresse_arrivee" class="form-label">Lieu d'arrivée</label>
+                                                    <input type="text" class="form-control" id="adresse_arrivee" placeholder="Ville d'arrivée">
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="date_depart" class="form-label">Date</label>
+                                                    <input type="date" class="form-control" id="date_depart">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="heure_depart" class="form-label">Heure</label>
+                                                    <input type="time" class="form-control" id="heure_depart">
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="nb_places" class="form-label">Places disponibles</label>
+                                                    <input type="number" class="form-control" id="nb_places" min="1" max="8" value="4">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="prix_personne" class="form-label">Prix par passager (€)</label>
+                                                    <input type="number" class="form-control" id="prix_personne" min="1" value="20">
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="vehiculeSelect" class="form-label">Véhicule</label>
+                                                <select class="form-select" id="vehiculeSelect">
+                                                    <option selected disabled>Sélectionner une voiture</option>
+                                                    <option value="add_new">Ajouter un véhicule</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <h5>Préférences de voyage :</h5>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check form-switch mb-3">
+                                                            <input class="form-check-input" type="checkbox" id="smokingPreference" checked>
+                                                            <label class="form-check-label" for="smokingPreference">Voyage non-fumeur</label>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-3">
+                                                            <input class="form-check-input" type="checkbox" id="animalsPreference">
+                                                            <label class="form-check-label" for="animalsPreference">Animaux acceptés</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="description" class="form-label">Informations complémentaires</label>
+                                                <textarea class="form-control" id="description" rows="3" placeholder="Précisez le lieu de rendez-vous, les arrêts possibles, etc."></textarea>
+                                            </div>
+
+                                            <div class="text-end">
+                                                <button type="submit" name="trips" class="btn btn-primary">Publier le trajet</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Historique -->
+                    <div class="tab-pane fade" id="v-pills-historique" role="tabpanel" aria-labelledby="v-pills-commandes-tab" tabindex="0">
+                        <h3 class="section-title">Historique des trajets</h3>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5>Trajet :</h5>
+                                        <p class="mb-1"><i class="far fa-calendar me-2"></i> Date : </p>
+                                        <p class="mb-1"><i class="fas fa-car me-2"></i> Véhicule : </p>
+                                        <p class="mb-0"><i class="fas fa-users me-2"></i> Places occupées : </p>
+                                        <p class="mb-0"><i class="fas fa-star me-2"></i> Note : </p>
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        <span class="trip-status status-completed">Terminé</span>
+                                        <div class="mt-2">
+                                            <button class="btn btn-outline-secondary btn-sm">Détails</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Préférences -->
+                    <div class="tab-pane fade" id="v-pills-preferences" role="tabpanel" aria-labelledby="v-pills-menus-tab" tabindex="0">
+                        <h3 class="section-title">Mes préférences</h3>
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-sliders-h me-2"></i> Préférences de voyage
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <h5 class="mb-3">Préférences générales</h5>
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="prefSmoking" checked>
+                                                <label class="form-check-label" for="prefSmoking">Voyage non-fumeur</label>
+                                            </div>
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="prefAnimals">
+                                                <label class="form-check-label" for="prefAnimals">Animaux acceptés</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="prefMusic" checked>
+                                                <label class="form-check-label" for="prefMusic">Musique acceptée</label>
+                                            </div>
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="prefChat" checked>
+                                                <label class="form-check-label" for="prefChat">Conversation appréciée</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <h5 class="mb-3">Préférences personnalisées</h5>
+                                    <div class="mb-3">
+                                        <label for="customPreferences" class="form-label">Ajoutez vos propres préférences</label>
+                                        <textarea class="form-control" id="customPreferences" rows="3" placeholder="Ex: Arrêts pauses possibles, Bagage limité à un sac par personne..."></textarea>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary">Enregistrer les préférences</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+        </div>
+    </div>
+</div>
+<script type="module" src="../../js/auth/profil.js"></script>

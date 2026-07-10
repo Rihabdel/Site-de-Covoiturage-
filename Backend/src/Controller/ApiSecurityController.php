@@ -19,6 +19,7 @@ use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
 
@@ -110,9 +111,9 @@ final class ApiSecurityController extends AbstractController
     public function login(#[CurrentUser] ?User $user): JsonResponse
     {
         if (!$user) {
-            return new JsonResponse(['error' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['error' => 'identifiants incorrects'], Response::HTTP_UNAUTHORIZED);
         }
-        return new JsonResponse(['user' => $user->getEmail(), 'roles' => $user->getRoles()]);
+        return new JsonResponse(['user' => $user->getUserIdentifier(), 'roles' => $user->getRoles(), 'token' => $user->getApiToken()]);
     }
     #[Route('/logout', name: 'logout', methods: ['POST'])]
     #[OA\Post(
@@ -130,6 +131,7 @@ final class ApiSecurityController extends AbstractController
         $response->headers->clearCookie('token');
         return $response;
     }
+    #[IsGranted('ROLE_USER')]
     #[Route('/user', name: 'current_user', methods: ['GET'])]
     #[OA\Get(
         summary: "Récupération des informations de l'utilisateur connecté",
@@ -148,11 +150,15 @@ final class ApiSecurityController extends AbstractController
 
         return new JsonResponse([
             'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'pseudo' => $user->getPseudo(),
             'roles' => $user->getRoles(),
-            'isConducteur' => $user->isConducteur(),
-            'isPassager' => $user->isPassager(),
+            'token' => $user->getApiToken(),
+            'pseudo' => $user->getPseudo(),
+            'email' => $user->getEmail(),
+            'nom' => $user->getNom(),
+            'prenom' => $user->getPrenom(),
+            'dateNaissance' => $user->getDateNaissance() ? $user->getDateNaissance()->format('Y-m-d') : null,
+            'telephone' => $user->getTelephone(),
+            'createdAt' => $user->getCreatedAt(),
         ]);
     }
     #[Route('/user/update', name: 'update_user', methods: ['PUT'])]
@@ -179,91 +185,94 @@ final class ApiSecurityController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true);
 
-            if (!$data) {
-                return new JsonResponse(['error' => 'JSON invalide'], Response::HTTP_BAD_REQUEST);
+            if (empty($data)) {
+                return new JsonResponse(['error' => 'Aucune donnée reçue'], Response::HTTP_BAD_REQUEST);
             }
 
-            if (isset($data['pseudo'])) {
+            // --- Traitement chirurgical avec array_key_exists ---
+            if (array_key_exists('pseudo', $data)) {
                 $user->setPseudo($data['pseudo']);
             }
-            if (isset($data['email'])) {
+            if (array_key_exists('email', $data)) {
                 $user->setEmail($data['email']);
             }
-            if (isset($data['isConducteur'])) {
-                $user->setIsConducteur((bool)$data['isConducteur']);
+            if (array_key_exists('nom', $data)) {
+                $user->setNom(!empty($data['nom']) ? $data['nom'] : null);
             }
-            if (isset($data['isPassager'])) {
-                $user->setIsPassager((bool)$data['isPassager']);
+            if (array_key_exists('prenom', $data)) {
+                $user->setPrenom(!empty($data['prenom']) ? $data['prenom'] : null);
             }
-            if (isset($data['telephone'])) {
-                $user->setTelephone($data['telephone']);
+            if (array_key_exists('telephone', $data)) {
+                $user->setTelephone(!empty($data['telephone']) ? (int)$data['telephone'] : null);
             }
-            if (isset($data['dateNaissance'])) {
-                $user->setDateNaissance(new \DateTimeImmutable($data['dateNaissance']));
-            }
-            if (isset($data['photo'])) {
+            if (array_key_exists('photo', $data)) {
                 $user->setPhoto($data['photo']);
             }
-            if (isset($data['credit'])) {
-                $user->setCredit((float)$data['credit']);
+            if (array_key_exists('credit', $data)) {
+                $user->setCredits(!empty($data['credit']) ? (int)$data['credit'] : null);
             }
-            if (isset($data['note'])) {
-                $user->setNote((float)$data['note']);
+            if (array_key_exists('note', $data)) {
+                $user->setNote(!empty($data['note']) ? (int)$data['note'] : null);
             }
-            if ($user->isConducteur()) {
-                $user->setIsConducteur(true);
-                $user->setRoles(['ROLE_CONDUCTEUR']);
-            } else {
-                $user->setIsConducteur(false);
-                $user->setRoles(['ROLE_USER']);
+
+            // --- Gestion sécurisée unique de la date de naissance ---
+            if (array_key_exists('dateNaissance', $data)) {
+                $dateRaw = $data['dateNaissance'];
+                if (!empty($dateRaw)) {
+                    // CORRECTION : On utilise \DateTime au lieu de \DateTimeImmutable
+                    $user->setDateNaissance(new \DateTime($dateRaw)); 
+                } else {
+                    $user->setDateNaissance(null);
+                }
             }
+
+            // --- Gestion des statuts et rôles de l'application ---
+            if (array_key_exists('isPassager', $data)) {
+                $user->setIsPassager((bool)$data['isPassager']);
+            }
+
+            if (array_key_exists('isConducteur', $data)) {
+                $isConducteur = (bool)$data['isConducteur'];
+                $user->setIsConducteur($isConducteur);
+
+                $currentRoles = $user->getRoles();
+                if ($isConducteur) {
+                    if (!in_array('ROLE_CONDUCTEUR', $currentRoles)) {
+                        $currentRoles[] = 'ROLE_CONDUCTEUR';
+                    }
+                } else {
+                    $currentRoles = array_diff($currentRoles, ['ROLE_CONDUCTEUR']);
+                }
+                $user->setRoles(array_values($currentRoles));
+            }
+
+            // Sauvegarde en base de données
             $user->setUpdatedAt(new \DateTimeImmutable());
             $this->entityManager->flush();
 
-            return new JsonResponse(['message' => 'Utilisateur mis à jour avec succès']);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Erreur lors de la lecture des données JSON'], Response::HTTP_BAD_REQUEST);
+            // --- RETOUR DE L'OBJET MIS À JOUR ---
+            return new JsonResponse([
+                'message' => 'Utilisateur mis à jour avec succès',
+                'user' => [
+                    'id' => $user->getId(),
+                    'roles' => $user->getRoles(),
+                    'token' => $user->getApiToken(),
+                    'pseudo' => $user->getPseudo(),
+                    'email' => $user->getEmail(),
+                    'nom' => $user->getNom(),
+                    'prenom' => $user->getPrenom(),
+                    'dateNaissance' => $user->getDateNaissance() ? $user->getDateNaissance()->format('Y-m-d') : null,
+                    'telephone' => $user->getTelephone(),
+                    'isConducteur' => $user->isConducteur(),
+                    'isPassager' => $user->isPassager()
+                ]
+            ], Response::HTTP_OK);
+
+        } catch (\Throwable $e) {
+            return new JsonResponse([
+                'error' => 'Erreur interne lors de la mise à jour',
+                'details' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-    #[Route('/user/{email}', name: 'get_user_by_email', methods: ['GET'])]
-    #[OA\Get(
-        summary: "Récupération des informations d'un utilisateur par son email",
-        parameters: [
-            new OA\Parameter(
-                name: "email",
-                in: "path",
-                required: true,
-                description: "Email de l'utilisateur",
-                schema: new OA\Schema(type: "string")
-            )
-        ],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: "Informations de l'utilisateur"
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Utilisateur non trouvé"
-            )
-        ]
-    )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function getUserByEmail(string $email): JsonResponse
-    {
-        $user = $this->entityManager->getRepository(User::class)->findByEmail($email);
-        if (!$user) {
-            return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
-        }
-
-        return new JsonResponse([
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'pseudo' => $user->getPseudo(),
-            'roles' => $user->getRoles(),
-            'isConducteur' => $user->isConducteur(),
-            'isPassager' => $user->isPassager(),
-        ]);
-    }
-
 }

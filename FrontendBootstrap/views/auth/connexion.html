@@ -1,0 +1,46 @@
+<div class="form-container">
+                <div class="form-header">
+                    <h2>Connexion</h2>
+                    <p>Accédez à votre compte EcoRide</p>
+                </div>
+
+                <form action="" method="" id="FormConnexion">
+                    <div class="mb-3">
+                        <label for="EmailInput" class="form-label">Adresse e-mail</label>
+                        <input type="email" class="form-control" id="EmailInput" aria-describedby="emailHelp" name="email" autocomplete="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="PasswordInput" class="form-label">Mot de passe</label>
+                        <input type="password" class="form-control" id="PasswordInput" name="password" autocomplete="current-password" required>
+                        <div class="password-input-group">
+                            <span class="password-toggle" id="passwordToggle">
+                                <i class="far fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-end mt-2">
+                            <a href="/editPassword" class="forgot-password">Mot de passe oublié ?</a>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
+                        <label class="form-check-label" for="rememberMe">
+                            Se souvenir de moi
+                        </label>
+                    </div>
+
+                    <div class="text-center">
+                    <button type="button" class="btn btn-primary text-center" id="BtnLogin">Se connecter</button>
+                    </div>
+
+                    <div class="divider">
+                        <span class="divider-text">Nouveau chez EcoRide ?</span>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <p>Vous n'avez pas de compte ? <a href="/inscription" class="text-success fw-bold">Inscrivez-vous ici</a></p>
+
+                    </div>
+                </form>
+            </div>

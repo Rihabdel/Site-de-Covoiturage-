@@ -24,7 +24,7 @@ class VehiculeController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    #[Route('/', name: 'list', methods: ['GET'])]
+    #[Route('/user/{id}', name: 'list', methods: ['GET'])]
     #[OA\Get(
         tags: ["Vehicule"],
         summary: "Récupérer la liste des véhicules",
@@ -37,7 +37,7 @@ class VehiculeController extends AbstractController
     )]
     public function getVehicules(#[CurrentUser] User $user): JsonResponse
     {
-        $this->denyAccessUnlessGranted('ROLE_CONDUCTEUR', null, 'Only drivers can access this resource.');
+        $this->denyAccessUnlessGranted('ROLE_USER', null, 'Only drivers can access this resource.');
             $vehicules = $this->entityManager->getRepository(Vehicule::class)->findByProprietaire($user);
         return new JsonResponse([
         'vehicules' => array_map(fn($v) => [
@@ -50,7 +50,7 @@ class VehiculeController extends AbstractController
         ], $vehicules)
     ]);
     }
-    #[Route('/', name: 'create', methods: ['POST'])]
+    #[Route('/add', name: 'create', methods: ['POST'])]
     #[OA\Post(
         tags: ["Vehicule"],
         summary: "Créer un véhicule",
@@ -80,7 +80,7 @@ class VehiculeController extends AbstractController
         ]
     )]
     public function create(Request $request,#[CurrentUser] User $user): JsonResponse {
-        $this->denyAccessUnlessGranted('ROLE_CONDUCTEUR');
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $data = $request->toArray();
 
         $vehicule = new Vehicule();
@@ -104,7 +104,7 @@ class VehiculeController extends AbstractController
         'vehicule' => $vehicule
         ], Response::HTTP_CREATED, [], ['groups' => 'vehicule:read']);
     }
-    #[Route('/{id}', name: 'update', methods: ['PUT'])]
+    #[Route('/update/{id}', name: 'update', methods: ['PUT'])]
     #[OA\Put(
         tags: ["Vehicule"],
         summary: "Mettre à jour un véhicule",
@@ -183,7 +183,7 @@ class VehiculeController extends AbstractController
         ], Response::HTTP_OK, [], ['groups' => 'vehicule:read']);
     }
     
-    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
     #[OA\Delete(
         tags: ["Vehicule"],
         summary: "Supprimer un véhicule",
@@ -212,7 +212,7 @@ class VehiculeController extends AbstractController
         ]
     )]
     public function delete(#[CurrentUser] User $user, int $id): JsonResponse {
-        $this->denyAccessUnlessGranted('ROLE_CONDUCTEUR', null, 'Only drivers can access this resource.');
+        $this->denyAccessUnlessGranted('ROLE_USER', null, 'Only drivers can access this resource.');
         $vehicule = $this->entityManager->getRepository(Vehicule::class)->find($id);
 
         if (!$vehicule) {

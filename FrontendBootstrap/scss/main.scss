@@ -2,12 +2,12 @@
 @import url("../node_modules/bootstrap-icons/font/bootstrap-icons.css");
 
 main {
-    margin-bottom: 60px;
- 
+    margin-bottom: 100px;
+
 }
 p{
    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-   font-size: 18px;
+   font-size: 1rem;
 }
 a{
     text-decoration: none;
@@ -28,27 +28,27 @@ html {
 }
 body {
     background-color: $body-color;
-    color: white;
-    font-family: 'Madurai UI', Tahoma, Geneva, Verdana, sans-serif;
+    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
 }
 .navbar-brand{  
-    font-family: 'Hind Madurai', serif;
+     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 1.5rem;
     font-weight: 700;
     color:$dark !important;
 
 }
 .nav-link{
-    font-family: 'Hind Madurai', serif;
+     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 1.25rem;
     font-weight: 550;
     color:$dark !important;
 }
 .nav a{
-    font-family: 'Playfair Display', serif;
-    font-size: 25px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.25rem;
 }
 footer {
     position: absolute;
@@ -56,7 +56,7 @@ footer {
     width: 100%;
     color: white;
     font-family: 'Hind Madurai', serif;
-    font-size: 15px;
+    font-size: 0.9rem;
     padding: 20px 0;
 }
 .hero-scene {
@@ -134,12 +134,285 @@ footer {
         
         .feature-icon {
             font-size: 3rem;
-            color: var(--primary);
+            color: $primary;
             margin-bottom: 20px;
         }
+
         
         .feature-title {
             font-size: 1.5rem;
             margin-bottom: 15px;
             color: var(--text);
         }
+/*--connexion page */
+
+        .form-container {
+            max-width: 450px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: $surface;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+            
+        }
+
+        .form-header h2 {
+            color: white;
+            font-weight: 500;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color:$secondary;
+            font-size: 0.9rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color:$secondary;
+        }
+
+        .form-control {
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: $primary;
+            box-shadow: 0 0 0 0.25rem rgba(39, 174, 96, 0.25);
+        }
+
+        .password-toggle {
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .password-input-group {
+            position: relative;
+        }
+
+        .forgot-password {
+            text-decoration: none;
+            color: $primary !important;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .forgot-password:hover {
+            color: #219653;
+            text-decoration: underline;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .divider-text {
+            padding: 0 10px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .alert {
+            border-radius: 8px;
+            padding: 12px 15px;
+        }
+
+
+    
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            transition: background 0.3s;
+        }
+
+        .social-icon:hover {
+            background: var(--primary-color);
+        }
+
+        //** Profil page */
+//** Sidebar */
+.sidebar {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    height: fit-content;
+    position: sticky;
+    top: 90px;
+    
+}
+
+.sidebar .nav-link {
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    color: $dark;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: rgba(39, 174, 96, 0.1);
+    color: $primary;
+}
+
+//** Main Content Area */
+.tab-content {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+}
+
+.section-title {
+    position: relative;
+    margin-bottom: 25px;
+    font-weight: 700;
+    color: $secondary;
+    padding-bottom: 10px;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    height: 3px;
+    background-color: $primary;
+}
+
+//** User Header & Credit Badge */
+.user-header {
+    background: linear-gradient(135deg, $primary, #2ecc71);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.credit-badge {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: $dark;
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+//** Cartes de Véhicules & Statuts de Trajets */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color:$primary;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+    padding: 15px 20px;
+    border-radius: 10px 10px 0 0 !important;
+}
+.card-body {
+    padding: 20px;
+    color: $dark;
+    font-size: 0.95rem;
+    font-family: 'segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.vehicle-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+
+.role-badge {
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-driver {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.badge-passenger {
+    background-color: rgba(155, 89, 182, 0.1);
+    color: #9b59b6;
+}
+
+/* Statuts de trajets */
+.trip-status {
+    padding: 5px 10px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-planned {
+    background-color: rgba(241, 196, 15, 0.1);
+    color: #f39c12;
+}
+
+.status-in-progress {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.status-completed {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: #27ae60;
+}
+
+.status-cancelled {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+/* Préférences */
+.preference-tag {
+    display: inline-block;
+    background-color: #f8f9fa;
+    padding: 5px 12px;
+    border-radius: 50px;
+    margin: 0 5px 5px 0;
+    font-size: 0.9rem;
+    border: 1px solid #e9ecef;
+}

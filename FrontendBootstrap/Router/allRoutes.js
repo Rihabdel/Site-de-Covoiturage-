@@ -8,11 +8,12 @@ export const allRoutes = [
     new Route("/admin", "Administration", "/views/admin.html", ["ROLE_ADMIN"], "/js/admin.js"),
 
     // CONNEXION : Dans le sous-dossier auth
-    new Route("/connexion", "Connexion", "/views/auth/connexion.html", ["disconnected"], "/js/auth/connexion.js"),
+    new Route("/login", "Connexion", "/views/auth/connexion.html", ["disconnected"], "/js/auth/connexion.js"),
 
     // MON COMPTE : Ton fichier s'appelle office.html et est à la racine de /pages/
     new Route("/monCompte", "Mon Compte", "/views/auth/profil.html", ["ROLE_USER", "ROLE_ADMIN"], "/js/auth/profil.js"),
-
+    // MODIFICATION DU MOT DE PASSE : Ton fichier s'appelle editPassword.html et est à la racine de /pages/
+    new Route("/editPassword", "Modification du mot de passe", "/views/auth/editPassword.html", [], "/js/auth/editPassword.js"),
     // INSCRIPTION : Ton fichier s'appelle inscript.html à la racine de /pages/
     new Route("/inscription", "Inscription", "/views/auth/inscription.html", ["disconnected"], "/js/auth/inscription.js"),
 
