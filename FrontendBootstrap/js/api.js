@@ -30,11 +30,7 @@ export async function updateUserInfo(updatedData) {
     }
     return await response.json();
 }
-const form = document.getElementById("contactForm");
-if (form) {
-    console.log("Formulaire contact trouvé, ajout de l'événement submit");
-    form.addEventListener("submit", newContactMsg);
-}
+
 export async function deleteUserAccount() {
     const response = await fetch(`${API_URL}/user/delete`, {
         method: 'DELETE',
@@ -46,5 +42,77 @@ export async function deleteUserAccount() {
         const errorData = await response.json();
         throw new Error(errorData.message || `Erreur ${response.status}`);
     }
+    return await response.json();
+}
+
+// Récupération des véhicules d'un utilisateur
+export async function getVehicules() {
+    const myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getApiToken());
+    const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+    };
+    return fetch(`${API_URL}/vehicule/user`, requestOptions)
+        .then(response => {
+            if (!response.ok) throw new Error(`Erreur ${response.status}`);
+            return response.json();
+        }
+    );
+}
+export async function addVehicule(vehiculeData) {
+    const response = await fetch(`${API_URL}/vehicule/add`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-AUTH-TOKEN': getApiToken()
+        },
+        body: JSON.stringify(vehiculeData)
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erreur ${response.status}`);
+    }
+    return await response.json();
+}
+
+export async function updateVehicule(id, vehiculeData) {
+    const response = await fetch(`${API_URL}/vehicule/update/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-AUTH-TOKEN': getApiToken()
+        },
+        body: JSON.stringify(vehiculeData)
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erreur ${response.status}`);
+    }
+    return await response.json();
+}
+
+export async function deleteVehicule(vehiculeId) {
+    const response = await fetch(`${API_URL}/vehicule/delete/${vehiculeId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-AUTH-TOKEN': getApiToken()
+        }
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erreur ${response.status}`);
+    }
+    return await response.json();
+}
+export async function getVehiculeById(vehiculeId) {
+    const myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getApiToken());
+    const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+    };
+    const response = await fetch(`${API_URL}/vehicule/user/${vehiculeId}`, requestOptions);
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
     return await response.json();
 }

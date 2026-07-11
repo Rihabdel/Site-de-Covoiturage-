@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\SerializerInterface;
 
 
 #[Route('/api/vehicule', name: 'app_api_')]
@@ -24,7 +25,7 @@ class VehiculeController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    #[Route('/user/{id}', name: 'list', methods: ['GET'])]
+    #[Route('/user', name: 'list', methods: ['GET'])]
     #[OA\Get(
         tags: ["Vehicule"],
         summary: "Récupérer la liste des véhicules",
@@ -37,18 +38,19 @@ class VehiculeController extends AbstractController
     )]
     public function getVehicules(#[CurrentUser] User $user): JsonResponse
     {
-        $this->denyAccessUnlessGranted('ROLE_USER', null, 'Only drivers can access this resource.');
-            $vehicules = $this->entityManager->getRepository(Vehicule::class)->findByProprietaire($user);
-        return new JsonResponse([
-        'vehicules' => array_map(fn($v) => [
-            'marque' => $v->getMarque(),
-            'modele' => $v->getModele(),
-            'couleur' => $v->getCouleur(),
-            'energie' => $v->getEnergie(),
-            'numeroImmatriculation' => $v->getNumeroImmatriculation(),
-            'dateImmatriculation' => $v->getDateImmatriculation()?->format('Y-m-d'),
-        ], $vehicules)
-    ]);
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        $vehicules = $this->entityManager->getRepository(Vehicule::class)->findBy(['proprietaire' => $user]);
+            $data = array_map(fn($v) => [
+                'id' => $v->getId(),
+                'marque' => $v->getMarque(),
+                'modele' => $v->getModele(),
+                'couleur' => $v->getCouleur(),
+                'energie' => $v->getEnergie(),
+                'numeroImmatriculation' => $v->getNumeroImmatriculation(),
+                'dateImmatriculation' => $v->getDateImmatriculation() ? $v->getDateImmatriculation()->format('Y-m-d') : null,
+            ], $vehicules);
+
+    return $this->json($data, Response::HTTP_OK);
     }
     #[Route('/add', name: 'create', methods: ['POST'])]
     #[OA\Post(
@@ -163,19 +165,16 @@ class VehiculeController extends AbstractController
         if ($vehicule->getProprietaire() !== $user) {
             return $this->json(['message' => 'You are not the owner of this vehicle'], Response::HTTP_FORBIDDEN);
         }
-
         $data = $request->toArray();
-
         $vehicule->setMarque($data['marque'] ?? $vehicule->getMarque());
         $vehicule->setModele($data['modele'] ?? $vehicule->getModele());
         $vehicule->setCouleur($data['couleur'] ?? $vehicule->getCouleur());
         $vehicule->setEnergie($data['energie'] ?? $vehicule->getEnergie());
+        $vehicule->setNumeroImmatriculation($data['numeroImmatriculation'] ?? $vehicule->getNumeroImmatriculation());
         if (!empty($data['dateImmatriculation'])) {
             $vehicule->setDateImmatriculation(new \DateTime($data['dateImmatriculation']));
         }
-        if (!empty($data['numeroImmatriculation'])) {
-            $vehicule->setNumeroImmatriculation($data['numeroImmatriculation']);
-        }
+
         $this->entityManager->flush();
         return $this->json([
             'message' => 'Véhicule mis à jour',
@@ -231,4 +230,56 @@ class VehiculeController extends AbstractController
             'vehicule' => $vehicule
         ], Response::HTTP_OK, [], ['groups' => 'vehicule:read']);
     }
+    #[Route('/user/{id}', name: 'get', methods: ['GET'])]
+    #[OA\Get(
+        tags: ["Vehicule"],
+        summary: "Récupérer un véhicule par ID",
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                required: true,
+                description: "ID du véhicule à récupérer",
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Véhicule récupéré"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Véhicule non trouvé"
+            )
+        ]
+    )]
+    #[Route('/user/{id}', name: 'get', methods: ['GET'])]
+public function getVehiculeById(int $id): JsonResponse
+{
+    $vehicule = $this->entityManager
+        ->getRepository(Vehicule::class)
+        ->find($id);
+
+    if (!$vehicule) {
+        return $this->json(
+            ['message' => 'Véhicule introuvable'],
+            Response::HTTP_NOT_FOUND
+        );
+    }
+
+    $data = [
+        'id' => $vehicule->getId(),
+        'marque' => $vehicule->getMarque(),
+        'modele' => $vehicule->getModele(),
+        'couleur' => $vehicule->getCouleur(),
+        'energie' => $vehicule->getEnergie(),
+        'numeroImmatriculation' => $vehicule->getNumeroImmatriculation(),
+        'dateImmatriculation' => $vehicule->getDateImmatriculation()
+            ? $vehicule->getDateImmatriculation()->format('Y-m-d')
+            : null,
+    ];
+
+    return $this->json($data, Response::HTTP_OK);
+}
 }

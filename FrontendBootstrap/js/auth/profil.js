@@ -1,7 +1,6 @@
 import { showAndHideElementsForRoles, signout, isConnected } from '../script.js';
-import { getUserInfo, updateUserInfo , deleteUserAccount } from '../api.js';
+import { getUserInfo, updateUserInfo , deleteUserAccount ,addVehicule ,getVehicules , updateVehicule, deleteVehicule , getVehiculeById} from '../api.js';
 
-//INITIALISATION DE LA PAGE PROFIL
 export default async function initProfil() {
     console.log("Initialisation page profil");
 
@@ -11,20 +10,20 @@ export default async function initProfil() {
         return;
     }
 
-    try {
-        const user = await getUserInfo();
-       loadProfile(user);
-        
-        const vehicules = await getVehicules(user.id);
-        if (vehicules && vehicules.length > 0) {
-            currentVehicule = vehicules[0]; // Stockage du premier véhicule
-            displayVehicule(currentVehicule);
-        } else {
-            displayVehicule(null);
+        try {
+            const user = await getUserInfo();
+        loadProfile(user);
+            
+       const vehiculeInfo = document.getElementById('vehiculeInfo');
+       if (vehiculeInfo) {
+
+            vehiculeInfo.innerHTML = `<p>Chargement des véhicules...</p>`;
+            await loadVehicule();
         }
+     
 
         initProfileListeners(user);
-        initButtonsVehicule();
+        initVehiculeListener();
         initFormVehicule();
         initform();
         showAndHideElementsForRoles();
@@ -272,3 +271,188 @@ async function deleteAccount() {
         alert("Impossible de supprimer le compte.");
     }
 }
+
+
+// --- Section Véhicule ---
+async function loadVehicule()   {
+    try {
+        const user = await getUserInfo();
+        const vehicules = await getVehicules();
+        displayVehicules(vehicules);
+    }
+    catch (error) {
+        console.error("Erreur lors du chargement des véhicules :", error);
+    }
+}
+async function displayVehicules(vehicules) {
+    const vehiculeInfo = document.getElementById("vehiculeInfo");
+
+    if (!vehiculeInfo) return;
+
+    if (!vehicules || vehicules.length === 0) {
+        vehiculeInfo.innerHTML = `<p>Aucun véhicule enregistré.</p>`;
+        return;
+    }
+
+    vehiculeInfo    .innerHTML = vehicules.map(v => `
+        <div class="vehicule-card col mb-4 p-2" data-id="${v.id}">
+            <div class="card-body ">
+                <h5 class="card-header">
+                    ${v.marque || "Marque inconnue"} ${v.modele || ""}
+                </h5>
+
+                <p class="card-text">
+                    <strong>Couleur :</strong> ${v.couleur || "Non renseignée"}<br>
+                    <strong>Immatriculation :</strong> ${v.numeroImmatriculation || "Non renseignée"}<br>
+                    <strong>Énergie :</strong> ${v.energie || "Non renseignée"}<br>
+                    <strong>Date de mise en circulation :</strong> ${v.dateImmatriculation || "Non renseignée"}
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                                        <button class="btn btn-outline-primary btn-sm" id="editVehiculeBtn" data-id="${v.id}">
+                                            <i class="fas fa-edit"></i> Modifier
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" id="deleteVehiculeBtn" data-id="${v.id}">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+             </div>
+        </div>
+    `).join("");
+}
+
+// Remplir le formulaire d'édition du véhicule avec les données actuelles
+function fillVehiculeForm(vehicule) {
+    const form = document.getElementById('editVehiculeForm');
+    if (!form || !vehicule) return;
+
+    form.elements['editVehiculeMarque'].value = vehicule.marque || '';
+    form.elements['editVehiculeModele'].value = vehicule.modele || '';
+    form.elements['editVehiculeEnergie'].value = vehicule.energie || '';
+    form.elements['editVehiculeCouleur'].value = vehicule.couleur || '';
+    form.elements['editVehiculeDateImmatriculation'].value = vehicule.dateImmatriculation || '';
+    form.elements['editVehiculeNumeroImmatriculation'].value = vehicule.numeroImmatriculation || '';
+}
+// Initialisation des écouteurs d'événements pour les véhicules
+function initVehiculeListener() {
+
+    const addVehiculeBtn = document.getElementById('addVehiculeBtn');
+    if (addVehiculeBtn) {
+        addVehiculeBtn.addEventListener('click', () => {
+            const modalEl = document.getElementById('addVehiculeModal');
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        });
+    }
+    const vehiculeInfo = document.getElementById('vehiculeInfo');
+    if (vehiculeInfo) {
+        vehiculeInfo.addEventListener('click', async (event) => {
+            const editBtn = event.target.closest('#editVehiculeBtn');
+            if (editBtn) {
+                const vehiculeId = editBtn.dataset.id;
+                const vehicule = await getVehiculeById(vehiculeId);
+                fillVehiculeForm(vehicule);
+                        console.log("Données du véhicule récupérées :", vehicule);
+                console.log("ID du véhicule à modifier :", vehiculeId);
+                const editVehiculeForm = document.getElementById('editVehiculeForm');
+                if (editVehiculeForm) {
+                    editVehiculeForm.dataset.id = vehiculeId;
+                    console.log("ID du véhicule stocké dans le formulaire :", editVehiculeForm.dataset.id);
+                }
+                
+                        
+                   
+                
+                const modalEl = document.getElementById('editVehiculeModal');
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            }
+            const deleteBtn = event.target.closest('#deleteVehiculeBtn');
+            if (deleteBtn) {
+                const vehiculeId = deleteBtn.dataset.id;
+                const modalEl = document.getElementById('deleteVehiculeModal');
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                const confirmDeleteBtn = document.getElementById('confirmDeleteVehiculeBtn');
+                if (confirmDeleteBtn) {
+                    confirmDeleteBtn.onclick = async () => {
+                        try {
+                            await deleteVehicule(vehiculeId);
+                            const user = await getUserInfo();
+                            const vehicules = await getVehicules(user.id);
+                            displayVehicules(vehicules);
+                            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                            alert("Véhicule supprimé avec succès.");
+                        } catch (error) {
+                            console.error("Erreur lors de la suppression du véhicule :", error);
+                            alert("Une erreur est survenue lors de la suppression du véhicule.");
+                        }
+                    };
+                }
+            
+            }
+        });
+    }
+   
+
+
+}
+
+function initFormVehicule() {
+    const addVehiculeForm = document.getElementById('addVehiculeForm');
+    if (addVehiculeForm) {
+        addVehiculeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(addVehiculeForm);
+            const vehiculeData = Object.fromEntries(formData);
+            try {
+                await addVehicule(vehiculeData);
+                const user = await getUserInfo();
+                const vehicules = await getVehicules(user.id);
+                displayVehicules(vehicules);
+
+                const modalEl = document.getElementById('addVehiculeModal');
+                bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                addVehiculeForm.reset();
+                alert("Véhicule ajouté avec succès !");
+            } catch (error) {
+                console.error("Erreur lors de l'ajout du véhicule :", error);
+                alert("Une erreur est survenue lors de l'ajout du véhicule.");
+            }
+        });
+    }
+
+    const editVehiculeForm = document.getElementById('editVehiculeForm');
+    if (!editVehiculeForm) return;
+    editVehiculeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(editVehiculeForm);
+        const vehiculeData = {
+                marque: formData.get('marque'),
+                modele: formData.get('modele'),
+                energie: formData.get('energie'),
+                couleur: formData.get('couleur'),
+                dateImmatriculation: formData.get('dateImmatriculation'),
+                numeroImmatriculation: formData.get('numeroImmatriculation')
+            };
+            const vehiculeId = editVehiculeForm.dataset.id;
+            if (!vehiculeId) {
+                console.error("ID du véhicule manquant pour la mise à jour.");
+                alert("Impossible de mettre à jour le véhicule : ID manquant.");
+                return;
+            }
+
+            try {
+                await updateVehicule(vehiculeId, vehiculeData);
+                const user = await getUserInfo();
+                const vehicules = await getVehicules(user.id);
+                displayVehicules(vehicules);
+                const modalEl = document.getElementById('editVehiculeModal');
+                bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                alert("Véhicule mis à jour avec succès !");
+                ;
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour du véhicule :", error);
+                alert("Une erreur est survenue lors de la mise à jour du véhicule.");
+            }
+        });
+    }
+
+

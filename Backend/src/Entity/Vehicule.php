@@ -8,10 +8,16 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\NotBlank;
+
 
 #[ORM\Entity(repositoryClass: VehiculeRepository::class)]
 class Vehicule
 {
+    #[Groups(["vehicule:read"])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

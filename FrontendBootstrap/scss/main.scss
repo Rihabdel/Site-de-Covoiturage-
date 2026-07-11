@@ -260,13 +260,16 @@ footer {
         //** Profil page */
 //** Sidebar */
 .sidebar {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    padding: 20px;
+
     height: fit-content;
     position: sticky;
     top: 90px;
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin: 20px 0 40px 0;
+    BORDER: 2PX SOLID RGBA(212, 167, 106, 0.2);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
     
 }
 
@@ -287,9 +290,11 @@ footer {
 //** Main Content Area */
 .tab-content {
     background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     padding: 25px;
+    border-radius: 20px;
+    margin: 20px 0 40px 0;
+    BORDER: 2PX SOLID RGBA(212, 167, 106, 0.2);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
 }
 
 .section-title {
@@ -329,13 +334,15 @@ footer {
 }
 
 //** Cartes de Véhicules & Statuts de Trajets */
-.card {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    margin-bottom: 20px;
-}
 
+.card {
+    border-radius: 10px;
+    BORDER: 2PX SOLID RGBA(212, 167, 106, 0.2);
+    margin: 10px 0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    padding: 15px;
+    
+}
 .card-header {
     background-color:$primary;
     border-bottom: 1px solid #eee;
@@ -349,11 +356,23 @@ footer {
     font-size: 0.95rem;
     font-family: 'segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.vehicle-card {
+.card-footer {
+            background-color: transparent;
+            border-top: none;
+            padding: 20px 25px;
+        }
+.vehicule-card {
+   display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin:10px 5px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.vehicle-card:hover {
+.vehicule-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }

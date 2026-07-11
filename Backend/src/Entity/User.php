@@ -298,7 +298,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
+     #[Groups(["vehicule:read"])]
     /**
      * @return Collection<int, Vehicule>
      */

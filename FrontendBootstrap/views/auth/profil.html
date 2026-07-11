@@ -160,35 +160,15 @@
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i> En tant que conducteur, vous devez renseigner au moins un véhicule pour proposer des trajets.
                         </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-4">
-                                <div class="card vehicle-card">
-                                    <div class="card-body" id="vehiculeCard">
-                                        <!-- Les informations du véhicule seront chargées ici via JavaScript -->
-                                    </div>
-                                    <div class="card-footer bg-transparent">
-                                        <button class="btn btn-outline-primary btn-sm" id="editVehiculeBtn">
-                                            <i class="fas fa-edit"></i> Modifier
-                                        </button>
-                                        <button class="btn btn-outline-danger btn-sm" id="deleteVehiculeBtn">
-                                            <i class="fas fa-trash"></i> Supprimer
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="card">
-                                    <div class="card-body text-center d-flex align-items-center justify-content-center" style="min-height: 200px;">
-                                        <div>
-                                            <i class="fas fa-plus-circle fa-3x text-muted mb-3"></i>
-                                            <p>Ajouter un véhicule</p>
-                                            <button class="btn btn-primary" id="addVehiculeBtn">Nouveau véhicule</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                              <!-- Modal pour l'ajout d'un véhicule -->
+                        <div class="text-center mb-4">
+                                <i class="fas fa-plus-circle fa-3x text-muted mb-3"></i>
+                                <button class="btn btn-primary" id="addVehiculeBtn">Nouveau véhicule</button>
+                           </div>
+                        <div class="row vehicule-section" id="vehiculeInfo">
+                           
+                        </div>    
+                            
+                            <!-- Modal pour l'ajout d'un véhicule -->
                             <div class="modal fade" id="addVehiculeModal" tabindex="-1" aria-labelledby="addVehiculeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
@@ -220,7 +200,7 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="vehiculeNumeroImmatriculation" class="form-label">Numéro d'immatriculation</label>
-                                                        <input type="number" class="form-control" id="vehiculeNumeroImmatriculation" name="NumeroImmatriculation" required min="1">
+                                                        <input type="text" class="form-control" id="vehiculeNumeroImmatriculation" name="numeroImmatriculation" required>
                                                     </div>
                                                     
                                                     <button type="submit" class="btn btn-primary">Ajouter le véhicule</button>
@@ -261,7 +241,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="editVehiculeNumeroImmatriculation" class="form-label">Numéro d'immatriculation</label>
-                                                    <input type="number" class="form-control" id="editVehiculeNumeroImmatriculation" name="NumeroImmatriculation" required min="1">
+                                                    <input type="text" class="form-control" id="editVehiculeNumeroImmatriculation" name="numeroImmatriculation" required>
                                                 </div>
                                                 
                                                 <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
@@ -288,7 +268,7 @@
                                     </div>
                                 </div>
                             </div>
-                  </div>
+                    </div>
                     <!-- Onglet Trajets -->
                     <div class="tab-pane fade" id="v-pills-trajets" role="tabpanel" aria-labelledby="v-pills-trajets-tab" tabindex="0">
                         <h3 class="section-title">Mes trajets</h3>
