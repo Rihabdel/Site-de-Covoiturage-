@@ -4,10 +4,25 @@ namespace App\Entity;
 
 use App\Repository\TrajetRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\CovoiturageRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Request;
+use OpenApi\Attributes as OA;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Serializer\SerializerInterface;
+
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TrajetRepository::class)]
 class Trajet
 {
+    #[Groups(['covoiturage:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -24,20 +39,18 @@ class Trajet
 
     #[ORM\Column]
     private ?float $longitudeArrivee = null;
-
     #[ORM\Column(length: 100)]
     private ?string $adresseDepart = null;
-
     #[ORM\Column(length: 100)]
     private ?string $adresseArrivee = null;
-
+#[Groups(['trajet:read'])]
     #[ORM\Column]
     private ?float $distance = null;
-
+#[Groups(['trajet:read'])]
     #[ORM\Column(nullable: true)]
     private ?int $duree = null;
-
-    #[ORM\OneToOne(mappedBy: 'trajet')]
+#[Groups(['trajet:read'])]
+    #[ORM\OneToOne(mappedBy: 'trajet', targetEntity: Covoiturage::class)]
     private ?Covoiturage $covoiturage = null;
     public function getId(): ?int
     {

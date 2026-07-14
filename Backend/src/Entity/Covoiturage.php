@@ -6,39 +6,53 @@ use App\Repository\CovoiturageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Request;
+use OpenApi\Attributes as OA;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Serializer\SerializerInterface;
+
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CovoiturageRepository::class)]
 class Covoiturage
 {
+    #[Groups(['covoiturage:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
+#[Groups(['covoiturage:read'])]
     #[ORM\Column(length: 100)]
     private ?string $adresseDepart = null;
-
+#[Groups(['covoiturage:read'])]
     #[ORM\Column(length: 100)]
     private ?string $adresseArrivee = null;
-
-    #[ORM\Column]
-    private ?\DateTime $dateDepart = null;
-
-    #[ORM\Column]
-    private ?\DateTime $dateArrivee = null;
-
+#[Groups(['covoiturage:read'])]
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $dateDepart = null;
+#[Groups(['covoiturage:read'])]
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $dateArrivee = null;
+#[Groups(['covoiturage:read'])]
     #[ORM\Column]
     private ?float $prix = null;
-
+#[Groups(['covoiturage:read'])]
     #[ORM\Column]
     private ?int $placeDisponible = null;
-
+#[Groups(['covoiturage:read'])]
     #[ORM\Column]
     private ?bool $voyageEcologique = null;
-
+#[Groups(['covoiturage:read'])]
     #[ORM\Column(type: 'string', enumType: Statut::class)]
     private ?Statut $statut =  Statut::PENDING;
-
+   
     #[ORM\ManyToOne(inversedBy: 'trajetsProposes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $chauffeur = null;
@@ -59,7 +73,10 @@ class Covoiturage
     #[ORM\OneToMany(targetEntity: Avis::class, mappedBy: 'covoiturage')]
     private Collection $avis;
 
-    #[ORM\OneToOne(mappedBy: 'covoiturage', cascade: ['persist', 'remove'])]
+  
+   
+    #[ORM\OneToOne(inversedBy: 'covoiturage', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Trajet $trajet = null;
 
     public function __construct()
@@ -97,24 +114,24 @@ class Covoiturage
         return $this;
     }
 
-    public function getDateDepart(): ?\DateTime
+    public function getDateDepart(): ?\DateTimeInterface
     {
         return $this->dateDepart;
     }
 
-    public function setDateDepart(\DateTime $dateDepart): static
+    public function setDateDepart(\DateTimeInterface $dateDepart): static
     {
         $this->dateDepart = $dateDepart;
 
         return $this;
     }
 
-    public function getDateArrivee(): ?\DateTime
+    public function getDateArrivee(): ?\DateTimeInterface
     {
         return $this->dateArrivee;
     }
 
-    public function setDateArrivee(\DateTime $dateArrivee): static
+    public function setDateArrivee(\DateTimeInterface $dateArrivee): static
     {
         $this->dateArrivee = $dateArrivee;
 
@@ -262,5 +279,14 @@ class Covoiturage
         $this->trajet = $trajet;
 
         return $this;
+    }
+    public function isValidatedByPassenger(): bool
+    {
+        foreach ($this->avis as $avis) {
+            if ($avis->getType() === 'passager' && $avis->isValidated()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

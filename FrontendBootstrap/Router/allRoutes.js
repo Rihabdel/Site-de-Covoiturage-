@@ -18,6 +18,7 @@ export const allRoutes = [
     new Route("/inscription", "Inscription", "/views/auth/inscription.html", ["disconnected"], "/js/auth/inscription.js"),
 
     new Route("/404", "Page introuvable", "/views/404.html", []),
+    new Route("/trajets", "Mes trajets", "/views/trajets.html", ["ROLE_USER", "ROLE_ADMIN"], "/js/trajets.js"),
 
 ];
 

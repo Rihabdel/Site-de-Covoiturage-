@@ -116,3 +116,65 @@ export async function getVehiculeById(vehiculeId) {
     if (!response.ok) throw new Error(`Erreur ${response.status}`);
     return await response.json();
 }
+// Récupération des trajets d'un utilisateur
+export async function getMyTrips() {
+    const myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getApiToken());
+
+    const response = await fetch(`${API_URL}/covoiturage/me`, {
+        method: "GET",
+        headers: myHeaders,
+    });
+
+    if (!response.ok) {
+        throw new Error(`Erreur ${response.status}`);
+    }
+    const data = await response.json();
+    return data.data; 
+}
+// Récupération d'un trajet par son ID
+export async function getTripById(tripId) {
+    console.log("Fetching trip details for ID:", tripId); // Log the tripId
+    const myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getApiToken());
+    const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+    };
+    const response = await fetch(`${API_URL}/covoiturage/detail/${tripId}`, requestOptions);
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+    return await response.json();
+}
+
+// Annulation d'un trajet
+export async function cancelTrip(tripId) {
+    const response = await fetch(`${API_URL}/covoiturage/${tripId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-AUTH-TOKEN': getApiToken()
+        }
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erreur ${response.status}`);
+    }
+    return await response.json();
+}
+//modification du statut d'un trajet    
+export async function updateTripStatus(tripId, updatedData) {
+    const response = await fetch(`${API_URL}/covoiturage/${tripId}/statut`, {
+    method: "PATCH", // ou PUT selon ta route
+    headers: {
+        "Content-Type": "application/json",
+        "X-AUTH-TOKEN": getApiToken()
+    },
+    body: JSON.stringify({
+        statut: updatedData.statut
+    })
+});
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Erreur ${response.status}`);
+    }
+    return await response.json();
+}

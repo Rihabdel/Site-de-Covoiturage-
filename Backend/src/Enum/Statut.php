@@ -6,6 +6,7 @@ enum Statut: string
 {
     case PENDING = 'pending';       // En attente
     case PLANNED = 'planned';       // Planifié
+    case STARTED = 'started';       // Démarré
     case FULL = 'full';             // Complet
     case CONFIRMED = 'confirmed';   // Confirmé
     case IN_PROGRESS = 'in_progress'; // En cours

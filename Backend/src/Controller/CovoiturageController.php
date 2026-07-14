@@ -4,7 +4,7 @@ namespace App\Controller;
 use App\Entity\Covoiturage;
 use App\Entity\User;
 use App\Enum\Statut;
-use Appp\Entity\trajet;
+use App\Entity\trajet;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Repository\CovoiturageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +24,7 @@ final class CovoiturageController extends AbstractController
 {
     public function __construct(private CovoiturageRepository $covoiturageRepository)
     {
+
     }
 // afficher tous les covoiturages
     #[Route('/', name: 'index', methods: ['GET'])]
@@ -148,30 +149,53 @@ final class CovoiturageController extends AbstractController
         description: "Erreur lors de la récupération du covoiturage"
     )]
     #[Groups(['covoiturage:read'])]
-    public function show(int $id): Response
+    public function show(int $id): JsonResponse
     {
         $covoiturage = $this->covoiturageRepository->find($id);
         if (!$covoiturage) {
             return $this->json(['message' => 'Covoiturage not found'], 404);
         }
-        $duree = $this->covoiturageRepository->duree($covoiturage);
-        $age = $covoiturage->getUser()->getDateNaissance()->diff(new \DateTime());
+        
+       $age = null;
+
+        if ($covoiturage->getChauffeur()->getDateNaissance()) {
+            $age = $covoiturage->getChauffeur()
+                ->getDateNaissance()
+                ->diff(new \DateTime())
+                ->y;
+        }
+        if ($covoiturage->getDateDepart() && $covoiturage->getDateArrivee()) {
+            $duree = $covoiturage->getDateDepart()->diff($covoiturage->getDateArrivee());
+        } else {
+            $duree = new \DateInterval('PT0H0M');
+        }
+        if ($covoiturage->getPlaceDisponible() <= 0) {
+            $statut = $covoiturage->getStatut();
+            if ($statut === Statut::PLANNED) {
+                $covoiturage->setStatut(Statut::FULL);
+            }
+        }
+        // S'il y a des passagers, afficher sinon afficher "Aucun passager"
+        $passagers = $covoiturage->getPassagers();
+
         return new JsonResponse([
-            'user' => $covoiturage->getUser()->getPseudo(),
-            'photo' => $covoiturage->getUser()->getPhoto(),
+            'chauffeur' => $covoiturage->getChauffeur()->getNom() . ' ' . $covoiturage->getChauffeur()->getPrenom(),
+            'photo' => $covoiturage->getChauffeur()->getPhoto(),
             'adresseDepart' => $covoiturage->getAdresseDepart(),
             'adresseArrivee' => $covoiturage->getAdresseArrivee(),
-            'nombrePlace' => $covoiturage->getNombrePlace(),
+            'nombrePlace' => $covoiturage->getPlaceDisponible(),
             'vehicule' => $covoiturage->getVehicule()->getMarque() . ' ' . $covoiturage->getVehicule()->getModele().' ' . $covoiturage->getVehicule()->getCouleur(),
             'immatriculation' => $covoiturage->getVehicule()->getNumeroImmatriculation().' ' . $covoiturage->getVehicule()->getDateImmatriculation()->format('Y-m-d'),
-            'energie' => $covoiturage->getvOYAGEcologique() ? 'Ecologique' : 'Non écologique',
-            'age' => $age->y,
-            'dateDepart' => $covoiturage->getDate()->format('Y-m-d'),
-            'heureDepart' => $covoiturage->getHeure()->format('H:i:s'),
+            'energie' => $covoiturage->isVoyageEcologique() ? 'Ecologique' : 'Non écologique',
+            'age' => $age,
+            'dateDepart' => $covoiturage->getDateDepart()->format('Y-m-d'),
+            'heureDepart' => $covoiturage->getDateDepart()->format('H:i:s'),
+            'heureArrivee' => $covoiturage->getDateArrivee()->format('H:i:s'),
             'prix' => $covoiturage->getPrix(),
+            'passagers' => count($passagers) > 0 ? $passagers : 'Aucun passager',
             'duree' => $duree->format('%h heures %i minutes'),
-            'note' => $covoiturage->getNote(),
-        ], 200, [], ['groups' => 'covoiturage:read']);
+            'note' => $covoiturage->getChauffeur()->getNote(),
+        ], 200);
     }
 
     #[Route('/user/{user}', name: 'get_by_user', methods: ['GET'])]
@@ -195,14 +219,24 @@ final class CovoiturageController extends AbstractController
         description: "Erreur lors de la récupération des covoiturages"
     )]
     #[Groups(['covoiturage:read'])]
-    public function getMyCovoiturages(): Response
+    public function getMyCovoiturages(#[CurrentUser] User $user, CovoiturageRepository $repo): Response
     {
-        $user = $this->getChauffeur();
-        
-        $covoiturages = $this->covoiturageRepository->findBy(['user' => $user]);
-        return $this->json($covoiturages, 200, [], ['groups' => 'covoiturage:read']);
-    }
+        if (!$user) {
+            return $this->json(['message' => 'Unauthorized'], 401);
+        }
+     
+    $covoiturages = $repo->findBy(['chauffeur' => $user]);
 
+    return $this->json(
+        [
+            'message' => count($covoiturages) > 0 ? 'Covoiturages trouvés' : 'Aucun covoiturage trouvé',
+            'data' => $covoiturages
+        ],
+        200,
+        [],
+        ['groups' => ['covoiturage:read','trajet:read','vehicule:read','user:read']]
+    );
+        }
 
 // mettre à jour le statut d'un covoiturage
     #[Route('/{id}/statut', name: 'update_statut', methods: ['PATCH'])]
@@ -274,16 +308,15 @@ final class CovoiturageController extends AbstractController
         $data = $request->toArray();
 
         // validation statuts autorisés
-        $statut = $data['statut'] ?? null;
+        $statut = $data['statut'];
         if (!$statut) {
             return $this->json(['message' => 'Statut manquant'], 400);
         }
-        try {
-            $statutEnum = StatutCovoiturage::from($statut);
-        } catch (\ValueError $e) {
-            return $this->json(['message' => 'Statut invalide'], 400);
-        }
-
+        
+            $statutEnum = Statut::tryFrom($data['statut']);
+            if (!$statutEnum) {
+                return $this->json(['message' => 'Statut invalide'], 400);
+            }
         $covoiturage->setStatut($statutEnum);
 
         $em->flush();
@@ -318,75 +351,105 @@ final class CovoiturageController extends AbstractController
         description: "Erreur lors de la suppression du covoiturage"
     )]
     #[IsGranted('ROLE_CONDUCTEUR', message: 'Seul le chauffeur peut supprimer le covoiturage')]
-    public function delete(int $id): JsonResponse
+    public function delete(int $id ,EntityManagerInterface $entityManager): JsonResponse
     {
-        $covoiturage = $this->covoiturageRepository->find($id);
+        $covoiturage = $this->covoiturageRepository->findOneBy(['id' => $id]);
 
         if (!$covoiturage) {
             return $this->json(['message' => 'Covoiturage introuvable'], 404);
         }
-
-        $this->covoiturageRepository->remove($covoiturage, true);
+        $user = $this->getUser();
+        if ($covoiturage->getChauffeur() !== $user) {
+            return $this->json(['message' => 'Seul le chauffeur peut supprimer le covoiturage'], 403);
+        }
+        // Supprimer le covoiturage
+        $entityManager->remove($covoiturage);
+        $entityManager->flush();
+        $user->setCredits(2);
+        $entityManager->flush();
 
         return $this->json(['message' => 'Covoiturage supprimé avec succès'], 200);
     }
 
 // créer un covoiturage
-    #[Route('/', name: 'create', methods: ['POST'])]
-    #[OA\Post(
-        tags: ["Covoiturage"],
-        summary: "Créer un nouveau covoiturage",
-        requestBody: new OA\RequestBody(
-            description: "Données du covoiturage à créer",
-            required: true,
-            content: new OA\JsonContent(
-                properties: [
-                    new OA\Property(property: "dateDepart", type: "string", format: "date-time", description: "Date et heure de départ (format: YYYY-MM-DD HH:mm:ss)"),
-                    new OA\Property(property: "dateArrivee", type: "string", format: "date-time", description: "Date et heure d'arrivée (format: YYYY-MM-DD HH:mm:ss)"),
-                    new OA\Property(property: "prix", type: "number", format: "float", description: "Prix du covoiturage"),
-                    new OA\Property(property: "placeDisponible", type: "integer", description: "Nombre de places disponibles"),
-                    new OA\Property(property: "voyageEcologique", type: "boolean", description: "Indique si le covoiturage est écologique"),
-                    new OA\Property(property: "latitudeDepart", type: "number", format: "float", description: "Latitude du point de départ"),
-                    new OA\Property(property: "longitudeDepart", type: "number", format: "float", description: "Longitude du point de départ"),
-                    new OA\Property(property: "latitudeArrivee", type: "number", format: "float", description: "Latitude du point d'arrivée"),
-                    new OA\Property(property: "longitudeArrivee", type: "number", format: "float", description: "Longitude du point d'arrivée"),
-                    new OA\Property(property: "distance", type: "number", format: "float", description: "Distance du trajet en kilomètres"),
-                    new OA\Property(property: "duree", type: "integer", description: "Durée du trajet en minutes")
-                ]
+        #[Route('/', name: 'create', methods: ['POST'])]
+        #[OA\Post(
+            tags: ["Covoiturage"],
+            summary: "Créer un nouveau covoiturage",
+            requestBody: new OA\RequestBody(
+                description: "Données du covoiturage à créer",
+                required: true,
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "adresseDepart", type: "string", description: "Adresse de départ (ex: Nice)"),
+                        new OA\Property(property: "adresseArrivee", type: "string", description: "Adresse d'arrivée (ex: Marseille)"),
+                        new OA\Property(property: "dateDepart", type: "string", format: "date-time", description: "Date et heure de départ (format: YYYY-MM-DD HH:mm:ss)"),
+                        new OA\Property(property: "dateArrivee", type: "string", format: "date-time", description: "Date et heure d'arrivée (format: YYYY-MM-DD HH:mm:ss)"),
+                        new OA\Property(property: "prix", type: "number", format: "float", description: "Prix du covoiturage"),
+                        new OA\Property(property: "placeDisponible", type: "integer", description: "Nombre de places disponibles"),
+                        new OA\Property(property: "vehicule", type: "integer", description: "ID du véhicule utilisé pour le covoiturage"),
+                        new OA\Property(property: "voyageEcologique", type: "boolean", description: "Indique si le covoiturage est écologique"),
+                        new OA\Property(property: "latitudeDepart", type: "number", format: "float", description: "43.7102"),
+                        new OA\Property(property: "longitudeDepart", type: "number", format: "float", description: "7.2620"),
+                        new OA\Property(property: "latitudeArrivee", type: "number", format: "float", description: "43.2965"),
+                        new OA\Property(property: "longitudeArrivee", type: "number", format: "float", description: "5.3698"),
+                        new OA\Property(property: "distance", type: "number", format: "float", description: "199.8"),
+                        new OA\Property(property: "duree", type: "integer", description: "150")
+                    ]
+                )
             )
-        )
-    )]
-    #[OA\Response(
-        response: 201,
-        description: "Covoiturage créé avec succès"
-    )]
-    #[OA\Response(
-        response: 400,
-        description: "Requête invalide (données manquantes ou invalides)"
-    )]
-    #[OA\Response(
-        response: 403,
-        description: "Seuls les conducteurs peuvent créer un covoiturage"
-    )]
-    #[OA\Response(
-        response: 500,
-        description: "Erreur lors de la création du covoiturage"
-    )]
-    #[IsGranted('ROLE_CONDUCTEUR', message: 'Seuls les conducteurs peuvent créer un covoiturage')]
-    public function create(Request $request, #[CurrentUser] User $user, CovoiturageRepository $repo, EntityManagerInterface $em): JsonResponse
-    {   
-        if (!$user->getIsConducteur()) {
+            )]
+            #[OA\Response(
+                response: 201,
+                description: "Covoiturage créé avec succès"
+            )]
+            #[OA\Response(
+                response: 400,
+                description: "Requête invalide (données manquantes ou invalides)"
+            )]
+            #[OA\Response(
+                response: 403,
+                description: "Seuls les conducteurs peuvent créer un covoiturage"
+            )]
+            #[OA\Response(
+                response: 500,
+                description: "Erreur lors de la création du covoiturage"
+            )]
+        #[IsGranted('ROLE_CONDUCTEUR', message: 'Seuls les conducteurs peuvent créer un covoiturage')]
+        public function create(Request $request,#[CurrentUser] User $user,EntityManagerInterface $em): JsonResponse
+    {
+        // Vérifier que l'utilisateur est conducteur
+        if (!$user->isConducteur()) {
             return $this->json([
                 'message' => 'Seuls les conducteurs peuvent créer un covoiturage'
             ], 403);
         }
-        // décoder le contenu JSON de la requête en tableau associatif
+
+        // Décoder le JSON
         $data = json_decode($request->getContent(), true);
+
         if (!$data) {
-            return $this->json(['message' => 'Données invalides'], 400);
+            return $this->json([
+                'message' => 'Données invalides'
+            ], 400);
         }
+
+        // Champs obligatoires
         $requiredFields = [
-            'dateDepart','dateArrivee','prix','placeDisponible','voyageEcologique','latitudeDepart','longitudeDepart','latitudeArrivee','longitudeArrivee','distance','duree'
+            'adresseDepart',
+            'adresseArrivee',
+            'dateDepart',
+            'dateArrivee',
+            'prix',
+            'placeDisponible',
+            'voyageEcologique',
+            'latitudeDepart',
+            'longitudeDepart',
+            'latitudeArrivee',
+            'longitudeArrivee',
+            'distance',
+            'vehicule',
+            'duree'
         ];
 
         foreach ($requiredFields as $field) {
@@ -396,71 +459,143 @@ final class CovoiturageController extends AbstractController
                 ], 400);
             }
         }
-        //LE CONDUCTEUR DOIT AVOIR UN VEHICULE
-        if (!$user->getVehicule()) {
+
+
+        // Vérifier que le conducteur possède un véhicule
+        $vehicule = $user->getVehicules()->first();
+
+        if (!$vehicule) {
             return $this->json([
                 'message' => 'Vous devez avoir un véhicule pour créer un covoiturage'
             ], 400);
         }
-        
-        // Créer un nouvel objet Trajet et définir ses propriétés   
-        $trajet = new Trajet();
-        $trajet->setLatitudeDepart($data['latitudeDepart']);
-        $trajet->setLongitudeDepart($data['longitudeDepart']);
-        $trajet->setLatitudeArrivee($data['latitudeArrivee']);
-        $trajet->setLongitudeArrivee($data['longitudeArrivee']);
-        $trajet->setDistance($data['distance']);
-        $trajet->setDuree($data['duree']);
-        $em->persist($trajet);
-        
-        
-        
-        // Créer un nouvel objet Covoiturage et définir ses propriétés
-        
-        $dateDepart = new \DateTime($data['dateDepart']);
-        $dateArrivee = new \DateTime($data['dateArrivee']);
+
+
+        // Vérifier les dates
+        try {
+            $dateDepart = new \DateTime($data['dateDepart']);
+            $dateArrivee = new \DateTime($data['dateArrivee']);
+
+        } catch (\Exception $e) {
+
+            return $this->json([
+                'message' => 'Format de date invalide'
+            ], 400);
+        }
+
 
         if ($dateArrivee <= $dateDepart) {
             return $this->json([
                 'message' => 'La date d\'arrivée doit être postérieure à la date de départ'
             ], 400);
         }
-        if ($data['placeDisponible'] < 1) {
+
+
+        // Vérifier les places disponibles
+        if ((int)$data['placeDisponible'] < 1) {
             return $this->json([
                 'message' => 'Le nombre de places doit être supérieur à 0'
             ], 400);
         }
-        $credit = $credit -2;
+        // exiger le vehicule pour un trajet
+        if (!$vehicule) {
+            return $this->json([
+                'message' => 'Vous devez avoir un véhicule pour créer un covoiturage'
+            ], 400);
+        }
+
+        
+        
+        // Gestion voyage écologique
+        if (
+            $data['voyageEcologique'] === true &&
+            !in_array($vehicule->getEnergie(), ['Electrique', 'Hybride'])
+        ) {
+            return $this->json([
+                'message' => 'Pour un voyage écologique, le véhicule doit être électrique ou hybride'
+            ], 400);
+        }
+
+
+        // Un véhicule électrique ou hybride rend automatiquement le trajet écologique
+        if (in_array($vehicule->getEnergie(), ['Electrique', 'Hybride'])) {
+            $data['voyageEcologique'] = true;
+        }
+
+
+        // Vérifier les crédits
+        $credit = $user->getCredits();
+        $credit-= 2;
         if ($credit < 0) {
             return $this->json([
                 'message' => 'Vous n\'avez pas assez de crédits pour créer un covoiturage. Il vous faut au moins 2 crédits.'
             ], 400);
         }
-        $user->setCredit($credit);
+
+        $user->setCredits($credit - 2);
+
+
+
+        // Création du trajet
+
+        $trajet = new Trajet();
+
+        $trajet->setAdresseDepart($data['adresseDepart']);
+        $trajet->setAdresseArrivee($data['adresseArrivee']);
+
+        $trajet->setLatitudeDepart($data['latitudeDepart']);
+        $trajet->setLongitudeDepart($data['longitudeDepart']);
+
+        $trajet->setLatitudeArrivee($data['latitudeArrivee']);
+        $trajet->setLongitudeArrivee($data['longitudeArrivee']);
+
+        $trajet->setDistance($data['distance']);
+        $trajet->setDuree($data['duree']);
+
+
+
+        // Création du covoiturage
+        $covoiturage = new Covoiturage();
+
+        $covoiturage->setChauffeur($user);
+        $covoiturage->setVehicule($vehicule);
+        $covoiturage->setTrajet($trajet);
+
+        $covoiturage->setAdresseDepart($data['adresseDepart']);
+        $covoiturage->setAdresseArrivee($data['adresseArrivee']);
+
+        $covoiturage->setDateDepart($dateDepart);
+        $covoiturage->setDateArrivee($dateArrivee);
+
+        $covoiturage->setPrix((float)$data['prix']);
+        $covoiturage->setPlaceDisponible((int)$data['placeDisponible']);
+
+        $covoiturage->setVoyageEcologique((bool)$data['voyageEcologique']);
+
+        // Statut par défaut
+        $covoiturage->setStatut(Statut::PLANNED);
+
+
+
+        // Sauvegarde BDD
+        $em->persist($trajet);
         $em->persist($user);
-        $covoiturageData = new Covoiturage();
-        $covoiturageData->setChauffeur($user);
-        $covoiturageData->setDateDepart($dateDepart);
-        $covoiturageData->setDateArrivee($dateArrivee);
-        $covoiturageData->setPrix((float)$data['prix']);
-        $covoiturageData->setPlaceDisponible((int)$data['placeDisponible']);
-        $covoiturageData->setVoyageEcologique((bool)$data['voyageEcologique']);
-        $covoiturageData->setStatut(Statut::PENDING); // Définir le statut par défaut à PENDING
-        $covoiturageData->setVehicule($user->getVehicule());
-        $covoiturageData->setTrajet($trajet); // Associer le trajet au covoiturage
-        $em->persist($covoiturageData);
+        $em->persist($covoiturage);
+
         $em->flush();
-    
+
+
+
         return $this->json([
-            'message' => 'Covoiturage créé avec succès',
-            'covoiturage' => $covoiturageData
-        ], 201, [
-            'Location' => $this->generateUrl(
-                'app_api_covoiturage_show',
-                ['id' => $covoiturageData->getId()]
-            )
-        ], [
-            'groups' => 'covoiturage:read'
-        ]);
-}
+        'message' => 'Covoiturage créé avec succès',
+        'covoiturage' => [
+            'id' => $covoiturage->getId(),
+            'dateDepart' => $covoiturage->getDateDepart()?->format('Y-m-d H:i:s'),
+            'dateArrivee' => $covoiturage->getDateArrivee()?->format('Y-m-d H:i:s'),
+            'prix' => $covoiturage->getPrix(),
+            'placeDisponible' => $covoiturage->getPlaceDisponible(),
+            'voyageEcologique' => $covoiturage->isVoyageEcologique(),
+            ]
+        ], 201);
+    }
 }

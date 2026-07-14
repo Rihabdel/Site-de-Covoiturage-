@@ -1,0 +1,188 @@
+<!-- Onglet Trajets -->
+<div class="container mb-5">
+        <div class="user-header">
+            <div class="row align-items-center" id="user-header">
+            <div class=" text-center">
+                <h2 class="user-initials">Mes covoiturages</h2>
+            </div>
+            </div>
+        </div>        
+        <div class="row profil-container-fluid">
+        <!-- Sidebar -->
+            <div class="col-12 col-md-3 col-lg-2 mb-3">
+                            <div class="nav nav-pills me-3 flex-md-column flex-row sidebar" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                    <button class="nav-link active" id="v-pills-trajets-tab" data-bs-toggle="pill" data-bs-target="#v-pills-trajets" type="button" role="tab" aria-controls="v-pills-trajets" aria-selected="true">Trajets</button>
+                                    <button class="nav-link" id="v-pills-create-tab" data-bs-toggle="pill" data-bs-target="#v-pills-create" type="button" role="tab" aria-controls="v-pills-historique" aria-selected="false">Ajouter </button>
+                            </div>
+            </div>    
+            <div class="tab-content col-12 col-md-9 col-lg-10" id="v-pills-tabContent">    
+                    <!-- Contenu des onglets -->
+                    <div class="tab-pane fade show active" id="v-pills-trajets" role="tabpanel" aria-labelledby="v-pills-trajets-tab" tabindex="-1">
+                        <h3 class="section-title">Mes trajets</h3>
+                        <ul class="nav nav-tabs" id="myTripsTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link " id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">Terminé</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="planned-tab" data-bs-toggle="tab" data-bs-target="#planned" type="button" role="tab">Planifiés</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="inprogress-tab" data-bs-toggle="tab" data-bs-target="#inprogress" type="button" role="tab">En cours</button>
+                            </li>
+                        </ul>
+                    
+                        <div class="tab-content mt-4" id="myTripsTabContent">
+                            <!-- Trajets Planifiés -->
+                            <div class="tab-pane fade show active" id="planned" role="tabpanel">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row align-items-center" id="planned-trip">
+                                            <div class="col-md-8">
+                                                <h5>Trajet :</h5>
+                                                <p class="mb-1"><i class="far fa-calendar me-2"></i> Date :</p>
+                                                <p class="mb-1"><i class="fas fa-car me-2"></i> Véhicule :</p>
+                                                <p class="mb-0"><i class="fas fa-users me-2"></i> Places disponibles :</p>
+                                                <p class="mb-0"><i class="fas fa-euro-sign me-2"></i> Prix par passager :</p>
+                                            </div>
+                                            <div class="col-md-4 text-md-end">
+                                                <p><span class="trip-status status-planned">Planifié</span></p>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-primary btn-sm">Démarrer</button>
+                                                    <button class="btn btn-outline-danger btn-sm">Annuler</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Trajets En cours -->
+                            <div class="tab-pane fade" id="inprogress" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-body" id="inProgress-trip">
+                                        <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5>Trajet :</h5>
+                                        <p class="mb-1"><i class="far fa-calendar me-2"></i> Date : </p>
+                                        <p class="mb-1"><i class="fas fa-car me-2"></i> Véhicule : </p>
+                                        <p class="mb-0"><i class="fas fa-users me-2"></i> Places occupées : </p>
+                                        <p class="mb-0"><i class="fas fa-star me-2"></i> Note : </p>
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        <span class="trip-status status-completed">Terminé</span>
+                                        <div class="mt-2">
+                                            <button class="btn btn-outline-secondary btn-sm details-trip" data-bs-toggle="modal" data-bs-target="#tripDetailsModal" data-id="${trip.id}">Détails</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Trajets Terminés -->
+                            <div class="tab-pane fade" id="history" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-body" id="history-trip">
+                                    </div>
+                                </div>
+                                <!-- Modal pour les détails du trajet -->
+                                <div class="modal fade" id="tripDetailsModal" tabindex="-1" aria-labelledby="tripDetailsModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="tripDetailsModalLabel">Détails du trajet</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                            </div>
+                                            <div class="modal-body" id="tripDetailsContainer">
+                                                <!-- Les détails du trajet seront insérés ici via JavaScript -->
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <!-- Onglet ajouter un trajet-->
+                    <div class="tab-pane fade" id="v-pills-create" role="tabpanel" aria-labelledby="v-pills-create-tab" tabindex="-1">
+                                <!-- Proposer un trajet -->
+                            <h3 class="section-title">Proposer un trajet</h3>
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <i class="fas fa-plus-circle me-2"></i> Proposer un nouveau trajet
+                                    </div>
+                                    <div class="card-body" id="create-trip">
+                                        <form action="proposer_trajet.php" method="POST">
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="adresse_depart" class="form-label">Lieu de départ</label>
+                                                    <input type="text" class="form-control" id="adresse_depart" placeholder="Ville de départ">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="adresse_arrivee" class="form-label">Lieu d'arrivée</label>
+                                                    <input type="text" class="form-control" id="adresse_arrivee" placeholder="Ville d'arrivée">
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="date_depart" class="form-label">Date</label>
+                                                    <input type="date" class="form-control" id="date_depart">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="heure_depart" class="form-label">Heure</label>
+                                                    <input type="time" class="form-control" id="heure_depart">
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="nb_places" class="form-label">Places disponibles</label>
+                                                    <input type="number" class="form-control" id="nb_places" min="1" max="8" value="4">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="prix_personne" class="form-label">Prix par passager (€)</label>
+                                                    <input type="number" class="form-control" id="prix_personne" min="1" value="20">
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="vehiculeSelect" class="form-label">Véhicule</label>
+                                                <select class="form-select" id="vehiculeSelect">
+                                                    <option selected disabled>Sélectionner une voiture</option>
+                                                    <option value="add_new">Ajouter un véhicule</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <h5>Préférences de voyage :</h5>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check form-switch mb-3">
+                                                            <input class="form-check-input" type="checkbox" id="smokingPreference" checked>
+                                                            <label class="form-check-label" for="smokingPreference">Voyage non-fumeur</label>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-3">
+                                                            <input class="form-check-input" type="checkbox" id="animalsPreference">
+                                                            <label class="form-check-label" for="animalsPreference">Animaux acceptés</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="description" class="form-label">Informations complémentaires</label>
+                                                <textarea class="form-control" id="description" rows="3" placeholder="Précisez le lieu de rendez-vous, les arrêts possibles, etc."></textarea>
+                                            </div>
+
+                                            <div class="text-end">
+                                                <button type="submit" name="trips" class="btn btn-primary">Publier le trajet</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                    </div>
+            </div>
+        </div>
+</div>
+<script src="../js/trajets.js" type="module"></script>

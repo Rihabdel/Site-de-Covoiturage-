@@ -291,10 +291,15 @@ async function displayVehicules(vehicules) {
 
     if (!vehicules || vehicules.length === 0) {
         vehiculeInfo.innerHTML = `<p>Aucun véhicule enregistré.</p>`;
+        vehiculeInfo.innerHTML += `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> En tant que conducteur, vous devez renseigner au moins un véhicule pour proposer des trajets.
+            </div>
+        `;
         return;
     }
 
-    vehiculeInfo    .innerHTML = vehicules.map(v => `
+    vehiculeInfo.innerHTML = vehicules.map(v => `
         <div class="vehicule-card col mb-4 p-2" data-id="${v.id}">
             <div class="card-body ">
                 <h5 class="card-header">
@@ -357,9 +362,6 @@ function initVehiculeListener() {
                     editVehiculeForm.dataset.id = vehiculeId;
                     console.log("ID du véhicule stocké dans le formulaire :", editVehiculeForm.dataset.id);
                 }
-                
-                        
-                   
                 
                 const modalEl = document.getElementById('editVehiculeModal');
                 bootstrap.Modal.getOrCreateInstance(modalEl).show();
