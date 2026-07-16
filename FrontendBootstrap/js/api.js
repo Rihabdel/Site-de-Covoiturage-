@@ -134,7 +134,6 @@ export async function getMyTrips() {
 }
 // Récupération d'un trajet par son ID
 export async function getTripById(tripId) {
-    console.log("Fetching trip details for ID:", tripId); // Log the tripId
     const myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getApiToken());
     const requestOptions = {
@@ -178,3 +177,37 @@ export async function updateTripStatus(tripId, updatedData) {
     }
     return await response.json();
 }
+
+//afficher les trajets disponibles
+export async function getTrips(filters = {}) {
+
+    const params = new URLSearchParams(filters);
+
+    const response = await fetch(`${API_URL}/covoiturage/list?${params.toString()}`);
+
+    if (!response.ok) {
+        throw new Error("Erreur API");
+    }
+
+   return await response.json();
+   
+}
+export async function participerCovoiturage(id) {
+
+    const response = await fetch(`${API_URL}/covoiturage/participer/${id}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-AUTH-TOKEN": getApiToken()
+        }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message);
+    }
+
+    return data;
+}
+

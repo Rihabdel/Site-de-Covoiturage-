@@ -36,32 +36,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
-    #[Groups(['user:read', 'user:write', 'user:update'])]
+    #[Groups(['user:read','covoiturage:read'])]
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $nom = null;
-    #[Groups(['user:read', 'user:write', 'user:update'])]
+    #[Groups(['user:read','covoiturage:read'])]
     #[Assert\NotBlank(message: 'Le pseudo est obligatoire.', groups: ['create', 'update'])]
     #[ORM\Column(length: 50)]
     private ?string $pseudo = null;
-    #[Groups(['user:read', 'user:write', 'user:update'])]
+    #[Groups(['user:read', 'covoiturage:read'])]
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $prenom = null;
     #[Groups(['user:read', 'user:update'])]
    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateNaissance = null;
-    #[Groups(['user:read','user:write','user:update'])]
+    #[Groups(['user:read','covoiturage:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
-    #[Groups(['user:read', 'user:update'])]
+   
     #[ORM\Column(nullable: true)]
     private ?int $credits = null;
-    #[Groups(['user:read', 'user:update'])]
+    
     #[ORM\Column(nullable: true)]
     private ?int $telephone = null;
-    #[Groups(['user:read', 'user:update'])]
+   
     #[ORM\Column]
     private ?bool $isConducteur = null;
-    #[Groups(['user:read', 'user:update'])]
+    
     #[ORM\Column]
     private ?bool $isPassager = null;
 
@@ -207,7 +207,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->pseudo;
     }
-
+  #[Groups(['covoiturage:read'])]
     public function setPseudo(string $pseudo): static
     {
         $this->pseudo = $pseudo;
@@ -286,7 +286,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
+  #[Groups(['covoiturage:read'])]
     public function isPassager(): ?bool
     {
         return $this->isPassager;
@@ -298,10 +298,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-     #[Groups(["vehicule:read"])]
+     
     /**
      * @return Collection<int, Vehicule>
      */
+   
     public function getVehicules(): Collection
     {
         return $this->vehicules;
@@ -451,7 +452,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
+     #[Groups(['user:read'])]
     public function getNote(): ?int
     {
         return $this->note;

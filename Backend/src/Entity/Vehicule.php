@@ -22,25 +22,25 @@ class Vehicule
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-    #[Groups(["vehicule:read"])]
+    #[Groups(["vehicule:read", "covoiturage:read"])]
     #[ORM\Column(length: 50)]
     private ?string $numeroImmatriculation = null;
-    #[Groups(["vehicule:read"])]
+    #[Groups(["vehicule:read", "covoiturage:read"])]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateImmatriculation = null;
-    #[Groups(["vehicule:read"])]
+    #[Groups(["vehicule:read", "covoiturage:read"])]
     #[ORM\Column(length: 50)]
     private ?string $modele = null;
-    #[Groups(["vehicule:read"])]
+    #[Groups(["vehicule:read", "covoiturage:read"])]
     #[ORM\Column(length: 50)]
     private ?string $couleur = null;
     #[Groups(["vehicule:read"])]
     #[ORM\Column(length: 50)]
     private ?string $marque = null;
-    #[Groups(["vehicule:read"])]
+    #[Groups(["vehicule:read", "covoiturage:read"])]
     #[ORM\Column(length: 50)]
     private ?string $energie = null;
-    #[Groups(["vehicule:read"])]
+    
     #[ORM\ManyToOne(inversedBy: 'vehicules')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $proprietaire = null;
@@ -60,8 +60,8 @@ class Vehicule
     {
         return $this->id;
     }
-    #[Groups(["vehicule:read"])]
-    public function getnumeroImmatriculation(): ?string
+   
+    public function getNumeroImmatriculation(): ?string
     {
         return $this->numeroImmatriculation;
     }
@@ -72,7 +72,7 @@ class Vehicule
 
         return $this;
     }
-    #[Groups(["vehicule:read"])]
+    
     public function getDateImmatriculation(): ?\DateTime
     {
         return $this->dateImmatriculation;
@@ -84,7 +84,7 @@ class Vehicule
 
         return $this;
     }
-    #[Groups(["vehicule:read"])]
+    
     public function getModele(): ?string
     {
         return $this->modele;
@@ -96,7 +96,7 @@ class Vehicule
 
         return $this;
     }
-    #[Groups(["vehicule:read"])]
+  
     public function getCouleur(): ?string
     {
         return $this->couleur;
@@ -108,7 +108,7 @@ class Vehicule
 
         return $this;
     }
-    #[Groups(["vehicule:read"])]
+   
     public function getMarque(): ?string
     {
         return $this->marque;
@@ -120,7 +120,7 @@ class Vehicule
 
         return $this;
     }
-
+  
     public function getEnergie(): ?string
     {
         return $this->energie;

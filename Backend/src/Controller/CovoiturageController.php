@@ -19,7 +19,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\SerializerInterface;
 
 
-#[Route('api/covoiturage', name: 'app_api_covoiturage')]
+#[Route('api/covoiturage', name: 'app_api_covoiturage_')]
 final class CovoiturageController extends AbstractController
 {
     public function __construct(private CovoiturageRepository $covoiturageRepository)
@@ -27,52 +27,31 @@ final class CovoiturageController extends AbstractController
 
     }
 // afficher tous les covoiturages
-    #[Route('/', name: 'index', methods: ['GET'])]
+    #[Route('/list', name: 'list', methods: ['GET'])]
     #[OA\Get(
         tags: ["Covoiturage"],
         summary: "Récupérer la liste des covoiturages",
         parameters: [
             new OA\Parameter(
+                name: "depart",
+                in: "query",
+                description: "Adresse de départ (ex: Nice)",
+                required: false,
+                schema: new OA\Schema(type: "string")
+            ),
+            new OA\Parameter(
+                name: "arrivee",
+                in: "query",
+                description: "Adresse d'arrivée (ex: Marseille)",
+                required: false,
+                schema: new OA\Schema(type: "string")
+            ),
+            new OA\Parameter(
                 name: "date",
                 in: "query",
-                description: "Filtrer par date (format: YYYY-MM-DD)",
+                description: "Date du covoiturage (format: YYYY-MM-DD)",
                 required: false,
                 schema: new OA\Schema(type: "string", format: "date")
-            ),
-            new OA\Parameter(
-                name: "heure",
-                in: "query",
-                description: "Filtrer par heure (format: HH:mm:ss)",
-                required: false,
-                schema: new OA\Schema(type: "string", format: "time")
-            ),
-            new OA\Parameter(
-                name: "prixMax",
-                in: "query",
-                description: "Filtrer par prix maximum",
-                required: false,
-                schema: new OA\Schema(type: "number", format: "float")
-            ),
-            new OA\Parameter(
-                name: "dureeMax",
-                in: "query",
-                description: "Filtrer par durée maximum (format: HH:mm:ss)",
-                required: false,
-                schema: new OA\Schema(type: "string", format: "time")
-            ),
-            new OA\Parameter(
-                name: "note",
-                in: "query",
-                description: "Filtrer par note de l'utilisateur (0 à 5)",
-                required: false,
-                schema: new OA\Schema(type: "number", format: "float")
-            ),
-            new OA\Parameter(
-                name: "ecologique",
-                in: "query",
-                description: "Filtrer par covoiturage écologique (true ou false)",
-                required: false,
-                schema: new OA\Schema(type: "boolean")
             )
         ],
     )]
@@ -85,46 +64,106 @@ final class CovoiturageController extends AbstractController
         response: 500,
         description: "Erreur lors de la récupération des covoiturages"
     )]
-    #[Groups(['covoiturage:read'])]
-    public function index(CovoiturageRepository $repo, Request $request): Response
+    
+    public function list(Request $request, CovoiturageRepository $repo): Response
     {
-        try {
-            $date = $request->query->get('date');
-            $heure = $request->query->get('heure');
-            $prixMax = $request->query->get('prixMax');
-            $dureeMax = $request->query->get('dureeMax');
-            $note = $request->query->get('note');
-            $ecologique = $request->query->get('ecologique');
+    try {
 
-            // 1. aucun filtre
-            if (!$date && !$heure && !$prixMax && !$dureeMax && !$note && $ecologique === null) {
-                $data = $repo->findAllWithAvailableSeats();
-                return $this->json($data, 200, [], ['groups' => 'covoiturage:read']);
-            }
-            if ($note) {
-                $covoiturages = $repo->findByMinDriverNote((float)$note);
-                return $this->json($covoiturages, 200, [], ['groups' => 'covoiturage:read']);
-            }
-        
-            // 2. filtres simples (version propre)
-            $covoiturages = $repo->findByFilters([
-                'date' => $date ? new \DateTime($date) : null,
-                'heure' => $heure ? new \DateTime($heure) : null,
-                'prixMax' => $prixMax ? (float)$prixMax : null,
-                'dureeMax' => $dureeMax ? (int)$dureeMax : null,
-                'ecologique' => $ecologique !== null ? filter_var($ecologique, FILTER_VALIDATE_BOOLEAN) : null,
-            ]);
-            return $this->json([
-                'message' => count($covoiturages) > 0 ? 'Covoiturages trouvés' : 'Aucun covoiturage trouvé',
-                'data' => $covoiturages
-            ], 200);
-        } catch (\Throwable $e) {
-            return $this->json([
-                'message' => 'Erreur serveur',
-                'error' => $e->getMessage()
-            ], 500);
+        $depart = $request->query->get('depart');
+        $arrivee = $request->query->get('arrivee');
+        $date = $request->query->get('date');
+
+        // Recherche obligatoire
+        if (!$depart || !$arrivee || !$date) {
+            return $this->json([]);
         }
+        $depart = trim(explode(',', $depart)[0]);
+        $arrivee = trim(explode(',', $arrivee)[0]);
+
+        // 1 - Recherche départ / arrivée / date
+        $covoiturages = $repo->findByFilters([
+            'depart' => $depart,
+            'arrivee' => $arrivee,
+            'date' => new \DateTime($date)
+        ]);
+
+
+        // 2 - Garder uniquement les trajets disponibles
+        $covoiturages = array_values(array_filter(
+            $covoiturages,
+            function ($covoiturage) {
+                return in_array($covoiturage->getStatut(), [
+                    Statut::PLANNED,
+                    Statut::CONFIRMED
+                ]);
+            }
+        ));
+
+
+        // 3 - Filtres sur les résultats
+        $prixMax = $request->query->get('prixMax');
+        $dureeMax = $request->query->get('dureeMax');
+        $note = $request->query->get('note');
+        $ecologique = $request->query->get('ecologique');
+
+
+        $covoiturages = array_values(array_filter(
+            $covoiturages,
+            function ($covoiturage) use (
+                $prixMax,
+                $dureeMax,
+                $note,
+                $ecologique
+            ) {
+
+                // Prix maximum
+                if ($prixMax !== null 
+                    && $covoiturage->getPrix() > (float)$prixMax) {
+                    return false;
+                }
+
+
+                // Voyage écologique
+                if ($ecologique !== null) {
+                    if ($covoiturage->isVoyageEcologique() 
+                        !== filter_var($ecologique, FILTER_VALIDATE_BOOLEAN)) {
+                        return false;
+                    }
+                }
+
+
+                // Note chauffeur
+                if ($note 
+                    && $note !== 'all' 
+                    && $note !== 'Note minimum') {
+
+                    if ($covoiturage->getChauffeur()->getNote() < (float)$note) {
+                        return false;
+                    }
+                }
+
+
+                return true;
+            }
+        ));
+
+
+        return $this->json(
+            $covoiturages,
+            200,
+            [],
+            ['groups' => ['covoiturage:read']]
+        );
+
+
+    } catch (\Throwable $e) {
+
+        return $this->json([
+            'message' => 'Erreur serveur',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 // afficher un covoiturage par id
     #[Route('/detail/{id}', name: 'show', methods: ['GET'])]
     #[OA\Get(
@@ -179,7 +218,9 @@ final class CovoiturageController extends AbstractController
         $passagers = $covoiturage->getPassagers();
 
         return new JsonResponse([
+            'id'=> $covoiturage->getId(),
             'chauffeur' => $covoiturage->getChauffeur()->getNom() . ' ' . $covoiturage->getChauffeur()->getPrenom(),
+            'pseudo' => $covoiturage->getChauffeur()->getPseudo(),
             'photo' => $covoiturage->getChauffeur()->getPhoto(),
             'adresseDepart' => $covoiturage->getAdresseDepart(),
             'adresseArrivee' => $covoiturage->getAdresseArrivee(),
@@ -597,5 +638,160 @@ final class CovoiturageController extends AbstractController
             'voyageEcologique' => $covoiturage->isVoyageEcologique(),
             ]
         ], 201);
+    }
+    #[Route('/participer/{id}', name: 'participer', methods: ['POST'])]
+    #[OA\Post(
+        tags: ["Covoiturage"],
+        summary: "Participer à un covoiturage",
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                description: "ID du covoiturage auquel participer",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Participation réussie"
+    )]
+    #[OA\Response(
+        response: 400,
+        description: "Requête invalide (covoiturage complet ou déjà participé)"
+    )]
+    #[OA\Response(
+        response: 403,
+        description: "Seuls les passagers peuvent participer à un covoiturage"
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Covoiturage introuvable"
+    )]
+    #[OA\Response(
+        response: 500,
+        description: "Erreur lors de la participation au covoiturage"
+    )]
+// Seuls les passagers peuvent participer à un covoiturage    
+    #[IsGranted('ROLE_USER', message: 'Seuls les passagers peuvent participer à un covoiturage')]
+    public function participer(int $id, #[CurrentUser] User $user, EntityManagerInterface $em): JsonResponse
+    {   
+        
+        $covoiturage = $this->covoiturageRepository->find($id);
+
+        if (!$covoiturage) {
+            return $this->json(['message' => 'Covoiturage introuvable'], 404);
+        }
+        if (!$user->isPassager()) {
+        return $this->json([
+            'message' => 'Vous devez être inscrit comme passager.'
+        ], 403);
+        }
+        // Vérifier si le covoiturage est complet
+        if ($covoiturage->getPlaceDisponible() <= 0) {
+            return $this->json(['message' => 'Covoiturage complet'], 400);
+        }
+
+        // Vérifier si l'utilisateur a déjà participé
+        if ($covoiturage->getPassagers()->contains($user)) {
+            return $this->json(['message' => 'Vous avez déjà participé à ce covoiturage'], 400);
+        }
+        
+        if ($covoiturage->getStatut() !== Statut::PLANNED && $covoiturage->getStatut() !== Statut::CONFIRMED) {
+            return $this->json(['message' => 'Vous ne pouvez pas participer à ce covoiturage car il n\'est pas planifié ou confirmé'], 400);
+        }
+        if ($covoiturage->getDateDepart() < new \DateTime()) {
+            return $this->json(['message' => 'Vous ne pouvez pas participer à ce covoiturage car il est déjà passé'], 400);
+        }
+        if ($covoiturage->getChauffeur()->getId() === $user->getId()) {
+            return $this->json(['message' => 'Vous ne pouvez pas participer à votre propre covoiturage'], 400);
+        }
+        if ($user->getCredits() < $covoiturage->getPrix()) {
+            return $this->json(['message' => 'Vous n\'avez pas assez de crédits pour participer à ce covoiturage'], 400);
+        }
+        
+        // Ajouter l'utilisateur aux passagers
+        $covoiturage->addPassager($user);
+        $covoiturage->setPlaceDisponible($covoiturage->getPlaceDisponible() - 1);
+        
+        if ($covoiturage->getPlaceDisponible() === 0) {
+            $covoiturage->setStatut(Statut::FULL);
+        }
+        $user->setCredits($user->getCredits() - (int) $covoiturage->getPrix());
+        $em->persist($user);
+        $em->persist($covoiturage);
+        $em->flush();
+
+        return $this->json($covoiturage, 200, [], ['groups' => 'covoiturage:read']);
+    }
+// list des covoiturages selon la recherche de l'utilisateur
+    #[Route('/search', name: 'search', methods: ['GET'])]
+    public function search(Request $request, CovoiturageRepository $repo): Response
+    {
+        $depart = $request->query->get('depart');
+        $arrivee = $request->query->get('arrivee');
+        $date = $request->query->get('date');
+
+        if (!$depart || !$arrivee || !$date) {
+        return $this->json([]);
+        }
+
+        $covoiturages = $repo->findByFilters([
+            'depart' => $depart,
+            'arrivee' => $arrivee,
+            'date' => $date ? new \DateTime($date) : null,
+        ]);
+
+        try {
+
+                    $prixMax = $request->query->get('prixMax');
+                    $dureeMax = $request->query->get('dureeMax');
+                    $note = $request->query->get('note');
+                    $ecologique = $request->query->get('ecologique');
+
+                        //afficher les covoiturage planifiés et confirmés uniquement
+                        $covoiturages = array_values(array_filter($covoiturages, function ($covoiturage) {
+                            return in_array($covoiturage->getStatut(), [
+                                Statut::PLANNED,
+                                Statut::CONFIRMED
+                            ]);
+                        }));
+                
+
+                    // 1. aucun filtre
+                    if (!$prixMax && !$dureeMax && !$note && $ecologique === null) {
+                        $data = $repo->findAllWithAvailableSeats();
+                        return $this->json($data, 200, [], ['groups' => 'covoiturage:read']);
+                    }
+                        if ($prixMax && $covoiturages->getPrix() > $prixMax) {
+                        return false;
+                    }
+                    if ($ecologique !== null 
+                    && $covoiturages->isVoyageEcologique() != $ecologique) {
+                    return false;
+                    }
+                    if ($note && $note !== 'all' && $note !== 'Note minimum') {
+                        $covoiturages = $repo->findByMinDriverNote((float)$note);
+                        return $this->json($covoiturages, 200, [], ['groups' => 'covoiturage:read']);
+                    }
+                    
+                    // filtres simples (version propre)
+                    $covoiturages = $repo->findByFilters([
+                        'prixMax'     => $prixMax ? (float)$prixMax : null,
+                        'dureeMax'    => $dureeMax ? (int)$dureeMax : null,
+                        'ecologique'  => $ecologique !== null
+                            ? filter_var($ecologique, FILTER_VALIDATE_BOOLEAN)
+                            : null,
+                        'note' => $note ? (float)$note : null
+                    ]);
+                    
+                    return $this->json($covoiturages , 200, [], ['groups' => ['covoiturage:read']]);
+                } catch (\Throwable $e) {
+                    return $this->json([
+                        'message' => 'Erreur serveur',
+                        'error' => $e->getMessage()
+                    ], 500);
+        }
     }
 }

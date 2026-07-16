@@ -49,9 +49,15 @@ class Trajet
 #[Groups(['trajet:read'])]
     #[ORM\Column(nullable: true)]
     private ?int $duree = null;
-#[Groups(['trajet:read'])]
+
     #[ORM\OneToOne(mappedBy: 'trajet', targetEntity: Covoiturage::class)]
     private ?Covoiturage $covoiturage = null;
+
+#[ORM\Column(length: 100, nullable: true)]
+private ?string $villeDepart = null;
+
+#[ORM\Column(length: 100, nullable: true)]
+private ?string $villeArrivee = null;
     public function getId(): ?int
     {
         return $this->id;
@@ -162,6 +168,30 @@ public function getCovoiturage(): ?Covoiturage
 public function setCovoiturage(?Covoiturage $covoiturage): static
 {
     $this->covoiturage = $covoiturage;
+
+    return $this;
+}
+
+public function getVilleDepart(): ?string
+{
+    return $this->villeDepart;
+}
+
+public function setVilleDepart(?string $villeDepart): static
+{
+    $this->villeDepart = $villeDepart;
+
+    return $this;
+}
+
+public function getVilleArrivee(): ?string
+{
+    return $this->villeArrivee;
+}
+
+public function setVilleArrivee(?string $villeArrivee): static
+{
+    $this->villeArrivee = $villeArrivee;
 
     return $this;
 }

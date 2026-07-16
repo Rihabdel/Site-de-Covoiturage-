@@ -18,7 +18,7 @@ class CovoiturageRepository extends ServiceEntityRepository
     public  function findAllWithAvailableSeats(): array
     {
         return $this->createQueryBuilder('c')
-            ->where('c.placesDisponibles > 0')
+            ->where('c.placeDisponible > 0')
             ->getQuery()
             ->getResult();
     }
@@ -40,7 +40,33 @@ class CovoiturageRepository extends ServiceEntityRepository
             $qb->andWhere('c.voyageEcologique = :eco')
             ->setParameter('eco', $filters['ecologique']);
         }
+        if (!empty($filters['depart'])) {
+            
+            $qb->andWhere('LOWER(c.adresseDepart) LIKE LOWER(:depart)')
+            ->setParameter('depart', '%' . $filters['depart'] . '%');
+        }
 
+        if (!empty($filters['arrivee'])) {
+            $qb->andWhere('LOWER(c.adresseArrivee) LIKE LOWER(:arrivee)')
+            ->setParameter('arrivee', '%' . $filters['arrivee'] . '%');
+        }
+
+        if (!empty($filters['date'])) {
+
+            $dateDebut = $filters['date'];
+
+            if (!$dateDebut instanceof \DateTimeInterface) {
+                $dateDebut = new \DateTime($dateDebut);
+            }
+
+            $dateFin = (clone $dateDebut)->modify('+1 day');
+
+            $qb->andWhere('c.dateDepart >= :dateDebut')
+            ->andWhere('c.dateDepart < :dateFin')
+            ->setParameter('dateDebut', $dateDebut)
+            ->setParameter('dateFin', $dateFin);
+            }
+        $qb->andWhere('c.placeDisponible > 0');
         return $qb->getQuery()->getResult();
 }
     public function findByMinDriverNote(float $note): array

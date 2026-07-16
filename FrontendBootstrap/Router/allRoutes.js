@@ -3,6 +3,8 @@ import Route from "./Route.js";
 export const allRoutes = [
     new Route("/", "Accueil", "/views/home.html", [], "/js/home.js"),
     new Route("/contact", "Contact", "/views/contact.html", [], "/js/contact.js"),
+    new Route("/recherche", "Recherche", "/views/recherche.html", [], "/js/recherche.js"),
+   
 
     // ADMIN : Vérifie que le fichier est bien à la racine de /pages/
     new Route("/admin", "Administration", "/views/admin.html", ["ROLE_ADMIN"], "/js/admin.js"),

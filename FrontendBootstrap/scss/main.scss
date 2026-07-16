@@ -344,22 +344,30 @@ footer {
     
 }
 .card-header {
-    background-color:$primary;
-    border-bottom: 1px solid #eee;
-    font-weight: 600;
     padding: 15px 20px;
+    border-bottom: 1px solid #322222;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: $dark;
+  
+    font-weight: 600;
+    
     border-radius: 10px 10px 0 0 !important;
 }
 .card-body {
     padding: 20px;
+    background-color: $card-bg;
     color: $dark;
     font-size: 0.95rem;
-    font-family: 'segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.card-footer {
+        .card-footer {
+           padding: 15px 20px;
             background-color: transparent;
-            border-top: none;
-            padding: 20px 25px;
+            border-top: 1px solid #eee; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 .vehicule-card {
    display: flex;
@@ -435,3 +443,112 @@ footer {
     font-size: 0.9rem;
     border: 1px solid #e9ecef;
 }
+.ride-card {
+
+            background-color: $card-bg !important;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .ride-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .driver-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .driver-info {
+            flex-grow: 1;
+        }
+
+        .driver-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .driver-rating {
+            color: #FFA000;
+            margin-top: 5px;
+        }
+
+        .ride-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color:black;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        .eco-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: $dark;
+            color: $light;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: $primary;
+        }
+
+        .btn-detail {
+            padding: 10px 20px;
+            background-color: $secondary;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-detail:hover {
+            background-color: #0b7dda;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            background-color: $card-bg;
+            color: $dark;
+            border-radius: 10px;
+            grid-column: 1 / -1;
+        }
+        .filters-section {
+            margin-top: 30px;
+            background-color: lighten($card-bg, 5%);
+            padding: 20px;
+            color: $dark;
+
+        }

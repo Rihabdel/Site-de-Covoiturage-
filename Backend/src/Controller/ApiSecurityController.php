@@ -73,6 +73,7 @@ final class ApiSecurityController extends AbstractController
             $hashedPassword = $this->hasher->hashPassword($user, $data['password']);
             $user->setPassword($hashedPassword);
             $user->setPseudo($data['pseudo'] ?? null);
+            $user->setCredits(20);
             $user->setApiToken(bin2hex(random_bytes(32)));
             if (isset($data['isConducteur'])) {
                 $user->setIsConducteur((bool)$data['isConducteur'] ?? false);
@@ -86,6 +87,7 @@ final class ApiSecurityController extends AbstractController
                 'message' => 'Utilisateur inscrit avec succès !',
                 'user' => [
                     'email' => $user->getEmail(),
+                    'credits' => $user->getCredits(),
                     'pseudo' => $user->getPseudo(),
                     'isConducteur' => $user->isConducteur(),
                     'isPassager' => $user->isPassager()
@@ -159,6 +161,7 @@ final class ApiSecurityController extends AbstractController
             'dateNaissance' => $user->getDateNaissance() ? $user->getDateNaissance()->format('Y-m-d') : null,
             'telephone' => $user->getTelephone(),
             'createdAt' => $user->getCreatedAt(),
+            'credits' => $user->getCredits(),
         ]);
     }
     #[Route('/user/update', name: 'update_user', methods: ['PUT'])]

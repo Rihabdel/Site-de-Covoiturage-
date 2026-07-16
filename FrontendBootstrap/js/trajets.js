@@ -102,17 +102,12 @@ export async function displayPlannedTrips() {
                 </div>
                 <div class="mb-1">
                 <i class="fas fa-user me-2"></i>
-                <strong>Passagers :</strong>${trip.passagers && trip.passagers.length > 0
-                        ? trip.passagers.map(p => p.pseudo).join(", ")
-                        : "Aucun passager"
-                }
-                </div>
-                <div class="mb-1">
+                    <strong>Passagers :</strong> ${trip.passagers.length > 0 ? trip.passagers.map(passager => passager.pseudo).join(', ') : ' Aucun passager'   }
                 </div>
             </div>
             <div class="col-md-4 text-md-end">
                 <p><span class="trip-status status-planned" id="trip-status">${trip.statut}</span></p>
-                <p class="card-text"><strong><i class="fas fa-user me-2"></i> Conducteur :</strong> ${trip.user} </p>
+                <p class="card-text"><strong><i class="fas fa-user me-2"></i> Conducteur :</strong> ${trip.chauffeur.pseudo} </p>
                     <div class="mt-2">
                         <button class="btn btn-primary btn-sm start-trip" data-id="${trip.id}">
                             Démarrer
@@ -333,7 +328,7 @@ function initCompletedTripsButtons() {
     });
 }
 //AFFICHER DETAILS DU TRAJET DANS UNE MODALE
-async function displayTripDetails(id) {
+export async function displayTripDetails(id) {
     try {
         
         const trip = await getTripById(id);

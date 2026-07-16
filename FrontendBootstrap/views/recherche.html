@@ -1,0 +1,253 @@
+<div class="container py-5">
+    <!-- Recherche -->
+    <div class="card shadow border-0 rounded-4 mb-5">
+        <div class="card p-4">
+            <div class="text-center mb-5">
+                <h1 class="fw-bold text-success">
+                    🌿 Trouvez votre covoiturage
+                </h1>
+                <p class="text-muted">
+                    Voyagez moins cher tout en protégeant la planète.
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <form id="searchForm">  
+                <div class="row g-3">
+                    
+                    <div class="col-md-4 position-relative">
+                        <label class="form-label">Départ</label>
+                        <input type="text" class="form-control" placeholder="adresse ou ville de départ" id="departInput" autocomplete="off" name="adresseDepart" required>
+                        <!-- Liste des suggestions OpenStreetMap -->
+                        <div id="depart-results" 
+                            class="list-group position-absolute w-100">
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4 position-relative">
+
+                    <label class="form-label">Arrivée</label>
+
+                    <input 
+                        type="text" class="form-control" placeholder="adresse ou ville d'arrivée" id="arriveeInput" autocomplete="off" required name="adresseArrivee">
+
+                    <div id="arrivee-results" 
+                        class="list-group position-absolute w-100">
+                    </div>
+            
+
+            
+
+                        <!-- Liste des suggestions OpenStreetMap -->
+                        <div id="date-results" class="list-group position-absolute w-100">
+                        </div>
+
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" placeholder="Sélectionnez une date" id="datetInput" name="dateDepart" required>
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <label class="form-label invisible">.</label>
+                        <button type="button" class="btn btn-success" id="searchBtn">Rechercher
+                        </button>
+                    </div>
+            </form>
+        </div>
+                <input 
+                type="hidden" id="latitudeDepart">
+                <input 
+                    type="hidden" id="longitudeDepart">
+                <input 
+                    type="hidden" id="villeDepart">
+                <input 
+                    type="hidden" id="latitudeArrivee">
+                <input 
+                    type="hidden" id="longitudeArrivee">
+                <input 
+                    type="hidden" id="villeArrivee">
+    </div>
+</div>
+    <!-- Résultats de la recherche -->
+    <div class="container mt-5">
+        <h3 class="mb-4">
+            Covoiturages disponibles
+        </h3>
+        <div id="results-covoiturages" class="row g-4">
+                    <!-- Filtres -->
+            <section class="container results-section">
+                    <div class="filters-section">
+                        <div class="section-subtitle mb-3">
+                        <button class="btn btn-filtres" data-bs-toggle="collapse" href="#filtresCollapse" onclick="" aria-expanded="false" aria-controls="filtresCollapse" onkeypress="onmouseover"><i class="bi bi-funnel"></i>Filtrez vos resultats</button>
+                        </div>
+                        <div class="collapse" id="filtresCollapse"> 
+                        <div class="container filter">
+                            <div class="row g-3">
+                                <div class="col mb-3">
+                                    <label for="prixMax" class="form-label">Prix maximum</label>
+                                    <input type="number" class="form-control" id="prixMax" placeholder="Entrez le prix maximum" min="0">
+                                    <span class="form-text">Prix maximum en euros</span>
+                                </div>
+
+                                <div class="col mb-3">
+                                    <label for="dureeMax" class="form-label">Durée (en minutes)</label>
+                                    <input type="number" class="form-control" id="dureeMax" placeholder="Entrez la durée" min="1">
+                                    <span class="form-text">Minimum de 1 minute</span>
+                                </div>
+
+                                <div class="col mb-3">
+                                    <label for="noteInput" class="form-label">Note</label>
+                                    <select aria-label="Note" class="form-select" id="noteInput">
+                                        <option value="all">Tous</option>
+                                        <option value="1">1 étoile et plus</option>
+                                        <option value="2">2 étoiles et plus</option>
+                                        <option value="3">3 étoiles et plus</option>
+                                        <option value="4">4 étoiles et plus</option>
+                                        <option value="5">5 étoiles</option>
+                                    </select>
+                                </div>
+
+                                <div class="col mb-3 form-check">
+                                    
+                                <input class="form-check-input" type="checkbox" id="flexCheckDefault">
+
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    🌱 Voyage écologique
+                                        </label>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn btn-outline-primary w-100" id="resetFilters">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+                                    </button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+            </section>
+        </div>
+    </div>
+
+    <!--modal details trajet-->
+    <div class="modal fade" id="tripDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="tripDetailsContainer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de participation -->
+    <div class="modal fade" id="participationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        Confirmation
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+                </div>
+
+                <div class="modal-body text-center">
+
+                    <i class="bi bi-car-front-fill text-success display-4 mb-3"></i>
+
+                    <h5>Participer à ce covoiturage ?</h5>
+
+                    <p class="text-muted mb-2">
+                        Vous allez réserver une place.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <strong id="creditsUtilises"></strong> crédits seront débités de votre compte.
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+
+                    <button
+                        class="btn btn-success"
+                        id="confirmParticipationBtn">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Confirmer
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de connexion requise -->
+    <div class="modal fade" id="loginRequiredModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-lock me-2"></i>
+                        Connexion requise
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+                </div>
+
+                <div class="modal-body text-center">
+
+                    <i class="bi bi-person-circle display-1 text-warning mb-3"></i>
+
+                    <h4>Vous devez être connecté</h4>
+
+                    <p class="text-muted">
+                        Pour participer à un covoiturage, vous devez vous connecter
+                        ou créer un compte EcoRide.
+                    </p>
+
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                        Plus tard
+                    </button>
+
+                    <button
+                        class="btn btn-success"
+                        id="goLoginBtn">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Se connecter
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+

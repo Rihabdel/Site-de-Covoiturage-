@@ -31,13 +31,13 @@ class Covoiturage
 #[Groups(['covoiturage:read'])]
     #[ORM\Column(length: 100)]
     private ?string $adresseDepart = null;
-#[Groups(['covoiturage:read'])]
+ #[Groups(['covoiturage:read'])]
     #[ORM\Column(length: 100)]
     private ?string $adresseArrivee = null;
-#[Groups(['covoiturage:read'])]
+     #[Groups(['covoiturage:read'])]
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateDepart = null;
-#[Groups(['covoiturage:read'])]
+ #[Groups(['covoiturage:read'])]
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateArrivee = null;
 #[Groups(['covoiturage:read'])]
@@ -185,7 +185,7 @@ class Covoiturage
 
         return $this;
     }
-
+    #[Groups(['covoiturage:read'])]
     public function getChauffeur(): ?User
     {
         return $this->chauffeur;
@@ -201,6 +201,7 @@ class Covoiturage
     /**
      * @return Collection<int, User>
      */
+    #[Groups(['covoiturage:read','trajet:read'])]
     public function getPassagers(): Collection
     {
         return $this->passagers;
@@ -221,7 +222,7 @@ class Covoiturage
 
         return $this;
     }
-
+     #[Groups(['covoiturage:read'])]
     public function getVehicule(): ?Vehicule
     {
         return $this->vehicule;
