@@ -23,4 +23,5 @@ class VehiculeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+ 
 }

@@ -102,6 +102,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?int $note = null;
 
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $accepteAnimaux = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $nonFumeur = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $descriptionPreference = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $musique = null;
+
     public function __construct()
     {
         $this->vehicules = new ArrayCollection();
@@ -277,7 +289,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function isConducteur(): ?bool
     {
-        return $this->isConducteur;
+        return in_array(
+        'ROLE_CONDUCTEUR',
+        $this->getRoles()
+    );
     }
 
     public function setIsConducteur(bool $isConducteur): static
@@ -289,7 +304,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
   #[Groups(['covoiturage:read'])]
     public function isPassager(): ?bool
     {
-        return $this->isPassager;
+        return in_array(
+        'ROLE_USER',
+        $this->getRoles()
+    );
     }
 
     public function setIsPassager(bool $isPassager): static
@@ -333,6 +351,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Covoiturage>
      */
+   
     public function getTrajetsProposes(): Collection
     {
         return $this->trajetsProposes;
@@ -363,6 +382,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Covoiturage>
      */
+    
     public function getTrajetsParticipes(): Collection
     {
         return $this->trajetsParticipes;
@@ -461,6 +481,54 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNote(?int $note): static
     {
         $this->note = $note;
+
+        return $this;
+    }
+
+    public function isAccepteAnimaux(): ?bool
+    {
+        return $this->accepteAnimaux;
+    }
+
+    public function setAccepteAnimaux(bool $accepteAnimaux): static
+    {
+        $this->accepteAnimaux = $accepteAnimaux;
+
+        return $this;
+    }
+
+    public function isNonFumeur(): ?bool
+    {
+        return $this->nonFumeur;
+    }
+
+    public function setNonFumeur(bool $nonFumeur): static
+    {
+        $this->nonFumeur = $nonFumeur;
+
+        return $this;
+    }
+
+    public function getDescriptionPreference(): ?string
+    {
+        return $this->descriptionPreference;
+    }
+
+    public function setDescriptionPreference(?string $descriptionPreference): static
+    {
+        $this->descriptionPreference = $descriptionPreference;
+
+        return $this;
+    }
+
+    public function isMusique(): ?bool
+    {
+        return $this->musique;
+    }
+
+    public function setMusique(bool $musique): static
+    {
+        $this->musique = $musique;
 
         return $this;
     }

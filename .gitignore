@@ -2,10 +2,10 @@
 /Backend/.env.local
 /Backend/var/
 /Backend/vendor/
-
+/vendor/
 # Cache Nelmio / Swagger généré
 /Backend/public/bundles/
-
+.phpunit.result.cache
 # Logs
 *.log
 

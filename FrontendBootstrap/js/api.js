@@ -3,6 +3,9 @@ export const API_URL = "http://127.0.0.1:8000/api";
 
 // Récupération des infos utilisateur
 export async function getUserInfo() {
+     console.log("API_URL :", API_URL);
+    console.log("Token :", getApiToken());
+
     const myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getApiToken());
     const requestOptions = {
@@ -126,11 +129,11 @@ export async function getMyTrips() {
         headers: myHeaders,
     });
 
-    if (!response.ok) {
-        throw new Error(`Erreur ${response.status}`);
-    }
     const data = await response.json();
-    return data.data; 
+
+    console.log("Réponse /covoiturage/me :", data);
+
+    return data.data;
 }
 // Récupération d'un trajet par son ID
 export async function getTripById(tripId) {
@@ -210,4 +213,43 @@ export async function participerCovoiturage(id) {
 
     return data;
 }
+export async function searchOpenStreetMap(query) {
 
+    try {
+
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(query)}&limit=5`
+        );
+
+        return await response.json();
+
+    } catch (error) {
+
+        console.error(error);
+        return [];
+    }
+}
+export async function addTrip(tripData) {
+    const response = await fetch(`${API_URL}/covoiturage/add`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-AUTH-TOKEN": getApiToken()
+        },
+        body: JSON.stringify(tripData)
+    });
+
+    const text = await response.text();
+    console.log("Réponse serveur :", text);
+
+    if (!response.ok) {
+        throw new Error(text);
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        console.error("Erreur lors de l'analyse de la réponse JSON :", error);
+        throw new Error("Erreur lors de l'analyse de la réponse JSON");
+    }
+}

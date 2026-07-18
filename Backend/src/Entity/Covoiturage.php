@@ -52,7 +52,7 @@ class Covoiturage
 #[Groups(['covoiturage:read'])]
     #[ORM\Column(type: 'string', enumType: Statut::class)]
     private ?Statut $statut =  Statut::PENDING;
-   
+   #[Groups(['covoiturage:read', 'trajet:read'])]
     #[ORM\ManyToOne(inversedBy: 'trajetsProposes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $chauffeur = null;

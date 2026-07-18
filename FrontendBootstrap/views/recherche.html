@@ -26,33 +26,27 @@
                     </div>
 
                     <div class="col-md-4 position-relative">
-
-                    <label class="form-label">Arrivée</label>
-
-                    <input 
-                        type="text" class="form-control" placeholder="adresse ou ville d'arrivée" id="arriveeInput" autocomplete="off" required name="adresseArrivee">
-
+                    <label class="form-label" >Arrivée</label>
+                    <input type="text" class="form-control" placeholder="adresse ou ville d'arrivée" id="arriveeInput" autocomplete="off" required name="adresseArrivee">
+                        <!-- Liste des suggestions OpenStreetMap -->
                     <div id="arrivee-results" 
                         class="list-group position-absolute w-100">
                     </div>
-            
-
-            
-
-                        <!-- Liste des suggestions OpenStreetMap -->
-                        <div id="date-results" class="list-group position-absolute w-100">
-                        </div>
-
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2 position-relative">
                         <label class="form-label">Date</label>
                         <input type="date" class="form-control" placeholder="Sélectionnez une date" id="datetInput" name="dateDepart" required>
+                    <!-- Liste des suggestions OpenStreetMap -->
+                        <div id="date-results" class="list-group position-absolute w-100">
+                        </div>
                     </div>
+
                     <div class="col-md-1 d-grid">
                         <label class="form-label invisible">.</label>
                         <button type="button" class="btn btn-success" id="searchBtn">Rechercher
                         </button>
                     </div>
+                </div>
             </form>
         </div>
                 <input 
@@ -251,3 +245,4 @@
         </div>
     </div>
 
+<script type="module" src="/js/openstreetmap.js"></script>

@@ -146,7 +146,7 @@ private ?string $villeArrivee = null;
 
         return $this;
     }
-
+    #[Groups(['trajet:read'])]
     public function getDuree(): ?int
     {
         return $this->duree;

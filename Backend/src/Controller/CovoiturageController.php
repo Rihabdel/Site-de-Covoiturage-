@@ -3,8 +3,11 @@
 namespace App\Controller;
 use App\Entity\Covoiturage;
 use App\Entity\User;
+use App\Repository\VehiculeRepository;
 use App\Enum\Statut;
 use App\Entity\trajet;
+use App\Service\GeocodingService;
+use App\Service\RoutingService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Repository\CovoiturageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -64,7 +67,7 @@ final class CovoiturageController extends AbstractController
         response: 500,
         description: "Erreur lors de la récupération des covoiturages"
     )]
-    
+     
     public function list(Request $request, CovoiturageRepository $repo): Response
     {
     try {
@@ -79,6 +82,8 @@ final class CovoiturageController extends AbstractController
         }
         $depart = trim(explode(',', $depart)[0]);
         $arrivee = trim(explode(',', $arrivee)[0]);
+
+        
 
         // 1 - Recherche départ / arrivée / date
         $covoiturages = $repo->findByFilters([
@@ -259,25 +264,21 @@ final class CovoiturageController extends AbstractController
         response: 500,
         description: "Erreur lors de la récupération des covoiturages"
     )]
-    #[Groups(['covoiturage:read'])]
     public function getMyCovoiturages(#[CurrentUser] User $user, CovoiturageRepository $repo): Response
     {
         if (!$user) {
             return $this->json(['message' => 'Unauthorized'], 401);
         }
-     
-    $covoiturages = $repo->findBy(['chauffeur' => $user]);
-
-    return $this->json(
-        [
-            'message' => count($covoiturages) > 0 ? 'Covoiturages trouvés' : 'Aucun covoiturage trouvé',
-            'data' => $covoiturages
-        ],
-        200,
-        [],
-        ['groups' => ['covoiturage:read','trajet:read','vehicule:read','user:read']]
-    );
+        // Récupérer les covoiturages de l'utilisateur connecté
+        $data= $repo->findBy(['chauffeur' => $user]);
+        if (!$data) {
+            return $this->json(['message' => 'Aucun covoiturage trouvé pour cet utilisateur'], 404);
         }
+        return $this->json([
+            'data' => $data
+        ], 200, [], ['groups' => 'covoiturage:read', 'trajet:read']);
+    }
+
 
 // mettre à jour le statut d'un covoiturage
     #[Route('/{id}/statut', name: 'update_statut', methods: ['PATCH'])]
@@ -413,7 +414,7 @@ final class CovoiturageController extends AbstractController
     }
 
 // créer un covoiturage
-        #[Route('/', name: 'create', methods: ['POST'])]
+        #[Route('/add', name: 'create', methods: ['POST'])]
         #[OA\Post(
             tags: ["Covoiturage"],
             summary: "Créer un nouveau covoiturage",
@@ -457,188 +458,268 @@ final class CovoiturageController extends AbstractController
                 description: "Erreur lors de la création du covoiturage"
             )]
         #[IsGranted('ROLE_CONDUCTEUR', message: 'Seuls les conducteurs peuvent créer un covoiturage')]
-        public function create(Request $request,#[CurrentUser] User $user,EntityManagerInterface $em): JsonResponse
-    {
-        // Vérifier que l'utilisateur est conducteur
-        if (!$user->isConducteur()) {
+        #[Route('/add', name: 'create', methods: ['POST'])]
+#[IsGranted('ROLE_CONDUCTEUR')]
+public function create(Request $request, #[CurrentUser] User $user, EntityManagerInterface $em,
+    GeocodingService $geocoder, RoutingService $routing, VehiculeRepository $vehiculeRepository): JsonResponse {
+
+    if (!$user->isConducteur()) {
+        return $this->json([
+            'message' => 'Seuls les conducteurs peuvent créer un covoiturage'
+        ], 403);
+    }
+
+    $data = json_decode($request->getContent(), true);
+
+    if (!$data) {
+        return $this->json([
+            'message' => 'Données invalides'
+        ], 400);
+    }
+
+    // Vérification champs obligatoires
+    $required = [
+        'adresseDepart',
+        'adresseArrivee',
+        'dateDepart',
+        'prix',
+        'placeDisponible',
+        'vehicule'
+    ];
+
+    foreach ($required as $field) {
+
+        if (!isset($data[$field]) || $data[$field] === '') {
+
             return $this->json([
-                'message' => 'Seuls les conducteurs peuvent créer un covoiturage'
-            ], 403);
+                'message' => "Le champ $field est obligatoire"
+            ],400);
         }
-
-        // Décoder le JSON
-        $data = json_decode($request->getContent(), true);
-
-        if (!$data) {
-            return $this->json([
-                'message' => 'Données invalides'
-            ], 400);
-        }
-
-        // Champs obligatoires
-        $requiredFields = [
-            'adresseDepart',
-            'adresseArrivee',
-            'dateDepart',
-            'dateArrivee',
-            'prix',
-            'placeDisponible',
-            'voyageEcologique',
-            'latitudeDepart',
-            'longitudeDepart',
-            'latitudeArrivee',
-            'longitudeArrivee',
-            'distance',
-            'vehicule',
-            'duree'
-        ];
-
-        foreach ($requiredFields as $field) {
-            if (!isset($data[$field])) {
-                return $this->json([
-                    'message' => "Le champ $field est obligatoire"
-                ], 400);
-            }
-        }
-
-
-        // Vérifier que le conducteur possède un véhicule
-        $vehicule = $user->getVehicules()->first();
+    }
+    // Récupération id de vehicule choisi par l'utilisateur
+   $vehicule = $vehiculeRepository->find($data['vehicule']);
 
         if (!$vehicule) {
             return $this->json([
-                'message' => 'Vous devez avoir un véhicule pour créer un covoiturage'
-            ], 400);
+                'message' => 'Véhicule introuvable'
+            ], 404);
         }
-
-
-        // Vérifier les dates
-        try {
-            $dateDepart = new \DateTime($data['dateDepart']);
-            $dateArrivee = new \DateTime($data['dateArrivee']);
-
-        } catch (\Exception $e) {
-
-            return $this->json([
-                'message' => 'Format de date invalide'
-            ], 400);
-        }
-
-
-        if ($dateArrivee <= $dateDepart) {
-            return $this->json([
-                'message' => 'La date d\'arrivée doit être postérieure à la date de départ'
-            ], 400);
-        }
-
-
-        // Vérifier les places disponibles
-        if ((int)$data['placeDisponible'] < 1) {
-            return $this->json([
-                'message' => 'Le nombre de places doit être supérieur à 0'
-            ], 400);
-        }
-        // exiger le vehicule pour un trajet
-        if (!$vehicule) {
-            return $this->json([
-                'message' => 'Vous devez avoir un véhicule pour créer un covoiturage'
-            ], 400);
-        }
-
         
-        
-        // Gestion voyage écologique
-        if (
-            $data['voyageEcologique'] === true &&
-            !in_array($vehicule->getEnergie(), ['Electrique', 'Hybride'])
-        ) {
-            return $this->json([
-                'message' => 'Pour un voyage écologique, le véhicule doit être électrique ou hybride'
-            ], 400);
-        }
 
+    // Géocodage
 
-        // Un véhicule électrique ou hybride rend automatiquement le trajet écologique
-        if (in_array($vehicule->getEnergie(), ['Electrique', 'Hybride'])) {
-            $data['voyageEcologique'] = true;
-        }
+    try {
 
+        $depart = $geocoder->getCoordinates(
+            $data['adresseDepart']
+        );
 
-        // Vérifier les crédits
-        $credit = $user->getCredits();
-        $credit-= 2;
-        if ($credit < 0) {
-            return $this->json([
-                'message' => 'Vous n\'avez pas assez de crédits pour créer un covoiturage. Il vous faut au moins 2 crédits.'
-            ], 400);
-        }
+        $arrivee = $geocoder->getCoordinates(
+            $data['adresseArrivee']
+        );
 
-        $user->setCredits($credit - 2);
-
-
-
-        // Création du trajet
-
-        $trajet = new Trajet();
-
-        $trajet->setAdresseDepart($data['adresseDepart']);
-        $trajet->setAdresseArrivee($data['adresseArrivee']);
-
-        $trajet->setLatitudeDepart($data['latitudeDepart']);
-        $trajet->setLongitudeDepart($data['longitudeDepart']);
-
-        $trajet->setLatitudeArrivee($data['latitudeArrivee']);
-        $trajet->setLongitudeArrivee($data['longitudeArrivee']);
-
-        $trajet->setDistance($data['distance']);
-        $trajet->setDuree($data['duree']);
-
-
-
-        // Création du covoiturage
-        $covoiturage = new Covoiturage();
-
-        $covoiturage->setChauffeur($user);
-        $covoiturage->setVehicule($vehicule);
-        $covoiturage->setTrajet($trajet);
-
-        $covoiturage->setAdresseDepart($data['adresseDepart']);
-        $covoiturage->setAdresseArrivee($data['adresseArrivee']);
-
-        $covoiturage->setDateDepart($dateDepart);
-        $covoiturage->setDateArrivee($dateArrivee);
-
-        $covoiturage->setPrix((float)$data['prix']);
-        $covoiturage->setPlaceDisponible((int)$data['placeDisponible']);
-
-        $covoiturage->setVoyageEcologique((bool)$data['voyageEcologique']);
-
-        // Statut par défaut
-        $covoiturage->setStatut(Statut::PLANNED);
-
-
-
-        // Sauvegarde BDD
-        $em->persist($trajet);
-        $em->persist($user);
-        $em->persist($covoiturage);
-
-        $em->flush();
-
-
+    } catch(\Exception $e){
 
         return $this->json([
-        'message' => 'Covoiturage créé avec succès',
-        'covoiturage' => [
-            'id' => $covoiturage->getId(),
-            'dateDepart' => $covoiturage->getDateDepart()?->format('Y-m-d H:i:s'),
-            'dateArrivee' => $covoiturage->getDateArrivee()?->format('Y-m-d H:i:s'),
-            'prix' => $covoiturage->getPrix(),
-            'placeDisponible' => $covoiturage->getPlaceDisponible(),
-            'voyageEcologique' => $covoiturage->isVoyageEcologique(),
-            ]
-        ], 201);
+            'message'=>'Impossible de trouver les coordonnées'
+        ],400);
+
     }
+
+    // Calcul route OSRM
+
+    $route = $routing->calculateRoute(
+        $depart['longitude'],
+        $depart['latitude'],
+        $arrivee['longitude'],
+        $arrivee['latitude']
+    );
+    try {
+
+        $dateDepart = new \DateTime(
+            $data['dateDepart']
+        );
+
+
+    } catch(\Exception $e){
+
+        return $this->json([
+            'message'=>'Date départ invalide'
+        ],400);
+    }
+
+
+
+    // Date arrivée automatique
+
+    $dateArrivee = clone $dateDepart;
+
+    $dateArrivee->modify(
+        '+' . $route['duree'] . ' minutes'
+    );
+
+
+
+    // Vérification places
+
+    if ((int)$data['placeDisponible'] < 1) {
+
+        return $this->json([
+            'message'=>'Nombre de places invalide'
+        ],400);
+    }
+
+
+
+    // Vérification crédits
+
+    if ($user->getCredits() < 2) {
+
+        return $this->json([
+            'message'=>'Vous devez avoir au moins 2 crédits'
+        ],400);
+    }
+
+
+    $user->setCredits(
+        $user->getCredits() - 2
+    );
+
+
+
+    // Création Trajet
+
+
+    $trajet = new Trajet();
+
+
+    $trajet->setAdresseDepart(
+        $data['adresseDepart']
+    );
+
+    $trajet->setAdresseArrivee(
+        $data['adresseArrivee']
+    );
+
+
+    $trajet->setLatitudeDepart(
+        $depart['latitude']
+    );
+
+    $trajet->setLongitudeDepart(
+        $depart['longitude']
+    );
+
+
+    $trajet->setLatitudeArrivee(
+        $arrivee['latitude']
+    );
+
+    $trajet->setLongitudeArrivee(
+        $arrivee['longitude']
+    );
+
+
+    $trajet->setDistance(
+       $route['distance']
+
+    );
+
+
+    $trajet->setDuree(
+        $route['duree']
+    );
+
+
+
+    // Création covoiturage
+
+
+    $covoiturage = new Covoiturage();
+
+
+    $covoiturage->setChauffeur($user);
+
+    $covoiturage->setVehicule($vehicule);
+
+    $covoiturage->setTrajet($trajet);
+
+
+    $covoiturage->setAdresseDepart(
+        $data['adresseDepart']
+    );
+
+    $covoiturage->setAdresseArrivee(
+        $data['adresseArrivee']
+    );
+
+
+    $covoiturage->setDateDepart(
+        $dateDepart
+    );
+
+
+    $covoiturage->setDateArrivee(
+        $dateArrivee
+    );
+
+
+    $covoiturage->setPrix(
+        (float)$data['prix']
+    );
+
+
+    $covoiturage->setPlaceDisponible(
+        (int)$data['placeDisponible']
+    );
+
+
+    // écologique automatique
+
+    $eco = in_array(
+        strtolower($vehicule->getEnergie()),
+        ['electrique','hybride']
+    );
+
+
+    $covoiturage->setVoyageEcologique($eco);
+
+
+    $covoiturage->setStatut(
+        Statut::PLANNED
+    );
+
+
+
+    $em->persist($trajet);
+    $em->persist($covoiturage);
+    $em->persist($user);
+
+    $em->flush();
+
+
+
+    return $this->json([
+
+        'message'=>'Covoiturage créé avec succès',
+
+        'data'=>[
+
+            'id'=>$covoiturage->getId(),
+
+            'distance'=>$trajet->getDistance(),
+
+            'duree'=>$trajet->getDuree(),
+
+            'dateDepart'=>$dateDepart->format('Y-m-d H:i'),
+
+            'dateArrivee'=>$dateArrivee->format('Y-m-d H:i')
+
+        ]
+
+    ],201);
+
+}
     #[Route('/participer/{id}', name: 'participer', methods: ['POST'])]
     #[OA\Post(
         tags: ["Covoiturage"],
@@ -725,73 +806,5 @@ final class CovoiturageController extends AbstractController
 
         return $this->json($covoiturage, 200, [], ['groups' => 'covoiturage:read']);
     }
-// list des covoiturages selon la recherche de l'utilisateur
-    #[Route('/search', name: 'search', methods: ['GET'])]
-    public function search(Request $request, CovoiturageRepository $repo): Response
-    {
-        $depart = $request->query->get('depart');
-        $arrivee = $request->query->get('arrivee');
-        $date = $request->query->get('date');
 
-        if (!$depart || !$arrivee || !$date) {
-        return $this->json([]);
-        }
-
-        $covoiturages = $repo->findByFilters([
-            'depart' => $depart,
-            'arrivee' => $arrivee,
-            'date' => $date ? new \DateTime($date) : null,
-        ]);
-
-        try {
-
-                    $prixMax = $request->query->get('prixMax');
-                    $dureeMax = $request->query->get('dureeMax');
-                    $note = $request->query->get('note');
-                    $ecologique = $request->query->get('ecologique');
-
-                        //afficher les covoiturage planifiés et confirmés uniquement
-                        $covoiturages = array_values(array_filter($covoiturages, function ($covoiturage) {
-                            return in_array($covoiturage->getStatut(), [
-                                Statut::PLANNED,
-                                Statut::CONFIRMED
-                            ]);
-                        }));
-                
-
-                    // 1. aucun filtre
-                    if (!$prixMax && !$dureeMax && !$note && $ecologique === null) {
-                        $data = $repo->findAllWithAvailableSeats();
-                        return $this->json($data, 200, [], ['groups' => 'covoiturage:read']);
-                    }
-                        if ($prixMax && $covoiturages->getPrix() > $prixMax) {
-                        return false;
-                    }
-                    if ($ecologique !== null 
-                    && $covoiturages->isVoyageEcologique() != $ecologique) {
-                    return false;
-                    }
-                    if ($note && $note !== 'all' && $note !== 'Note minimum') {
-                        $covoiturages = $repo->findByMinDriverNote((float)$note);
-                        return $this->json($covoiturages, 200, [], ['groups' => 'covoiturage:read']);
-                    }
-                    
-                    // filtres simples (version propre)
-                    $covoiturages = $repo->findByFilters([
-                        'prixMax'     => $prixMax ? (float)$prixMax : null,
-                        'dureeMax'    => $dureeMax ? (int)$dureeMax : null,
-                        'ecologique'  => $ecologique !== null
-                            ? filter_var($ecologique, FILTER_VALIDATE_BOOLEAN)
-                            : null,
-                        'note' => $note ? (float)$note : null
-                    ]);
-                    
-                    return $this->json($covoiturages , 200, [], ['groups' => ['covoiturage:read']]);
-                } catch (\Throwable $e) {
-                    return $this->json([
-                        'message' => 'Erreur serveur',
-                        'error' => $e->getMessage()
-                    ], 500);
-        }
-    }
 }

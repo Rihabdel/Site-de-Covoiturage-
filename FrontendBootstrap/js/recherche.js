@@ -1,6 +1,6 @@
 import { getTrips , getTripById, participerCovoiturage  } from './api.js';
 import { isConnected } from './script.js';
-
+import  { searchOpenStreetMap } from './openstreetmap.js';
 
 export default function initRecherche() {
 console.log("Initialisation de la recherche de covoiturages...");
@@ -10,13 +10,52 @@ console.log("Initialisation de la recherche de covoiturages...");
 
 
 export async function initBoutonsRecherche() {
-    
     const container = document.getElementById("results-covoiturages");
+    if (!container) {
+        console.error("L'élément avec l'ID 'results-covoiturages' n'a pas été trouvé.");
+        return;
+    }
     const  searchBtn = document.getElementById("searchBtn");
         if (searchBtn) {
             initSearchForm();
         }
-        
+        const departInput = document.getElementById("departInput");
+        const departResults = document.getElementById("depart-results");
+        const arriveeInput = document.getElementById("arriveeInput");
+        const arriveeResults = document.getElementById("arrivee-results");
+
+        if (!departInput || !departResults || !arriveeInput || !arriveeResults) {
+    console.error("Un ou plusieurs éléments de recherche sont introuvables.");
+    return;
+}
+
+        departInput.addEventListener("input", async () => {
+
+            const results = await searchOpenStreetMap(
+                departInput.value
+            );
+
+            showSuggestions(
+                results,
+                departResults,
+                departInput,
+                "depart"
+            );
+
+        });
+
+        arriveeInput.addEventListener("input", async () => {
+
+            const results = await searchOpenStreetMap(
+                arriveeInput.value
+            );
+            showSuggestions(
+                results,
+                arriveeResults,
+                arriveeInput,
+                "arrivee"
+            );
+        });
 
         container.addEventListener("click", async (event) => {
         const detailButton = event.target.closest('.detailBtn');
@@ -37,13 +76,13 @@ export async function initBoutonsRecherche() {
                 }
         }
         });
+    
         const participerContainer= document.getElementById("tripDetailsContainer");
         participerContainer.addEventListener("click", async (event) => {
             
             const btnParticiper = event.target.closest("#participerBtn");
             if (!btnParticiper) return;
             console.log("Bouton Participer cliqué !");
-            
             if (!isConnected()) {
                 bootstrap.Modal
                     .getOrCreateInstance(document.getElementById("loginRequiredModal"))
@@ -370,3 +409,53 @@ async function initSearchForm() {
     });
 }
 
+export function showSuggestions(results, container, input, type) {
+    if (!container) {
+        console.error("Container de suggestions introuvable.");
+        return;
+    }
+    container.innerHTML = "";
+
+    results.forEach(place => {
+
+        const item = document.createElement("button");
+
+        item.type = "button";
+        item.className = "list-group-item list-group-item-action";
+        item.textContent = place.display_name;
+
+        item.addEventListener("click", () => {
+
+            input.value = place.display_name;
+
+            container.innerHTML = "";
+
+            if (type === "arrivee") {
+
+                document.getElementById("latitudeArrivee").value = place.lat;
+                document.getElementById("longitudeArrivee").value = place.lon;
+
+                document.getElementById("villeArrivee").value =
+                    place.address.city ||
+                    place.address.town ||
+                    place.address.village ||
+                    "";
+
+            }
+            if (type === "depart") {
+
+                document.getElementById("latitudeDepart").value = place.lat;
+                document.getElementById("longitudeDepart").value = place.lon;
+                document.getElementById("villeDepart").value =
+                    place.address.city ||
+                    place.address.town ||
+                    place.address.village ||
+                    "";
+                    
+            }
+        }
+        );
+        container.appendChild(item);
+
+    });
+}

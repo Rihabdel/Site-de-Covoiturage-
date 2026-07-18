@@ -106,81 +106,83 @@
                     <!-- Onglet ajouter un trajet-->
                     <div class="tab-pane fade" id="v-pills-create" role="tabpanel" aria-labelledby="v-pills-create-tab" tabindex="-1">
                                 <!-- Proposer un trajet -->
-                            <h3 class="section-title">Proposer un trajet</h3>
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <i class="fas fa-plus-circle me-2"></i> Proposer un nouveau trajet
+                        <div class="container mt-4" id="createTripContainer">
+
+                            <div class="mb-4" id ="becomePassengerContainer">
+                                    <div class="text-center mt-3">
+                                        <button class="btn btn-secondary" id="becomePassengerBtn">Rester passager</button>
+                                        <button class="btn btn-primary" id="becomeDriverBtn">Devenir conducteur</button>
                                     </div>
-                                    <div class="card-body" id="create-trip">
-                                        <form action="proposer_trajet.php" method="POST">
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label for="adresse_depart" class="form-label">Lieu de départ</label>
-                                                    <input type="text" class="form-control" id="adresse_depart" placeholder="Ville de départ">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="adresse_arrivee" class="form-label">Lieu d'arrivée</label>
-                                                    <input type="text" class="form-control" id="adresse_arrivee" placeholder="Ville d'arrivée">
-                                                </div>
-                                            </div>
+                            </div>
 
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label for="date_depart" class="form-label">Date</label>
-                                                    <input type="date" class="form-control" id="date_depart">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="heure_depart" class="form-label">Heure</label>
-                                                    <input type="time" class="form-control" id="heure_depart">
-                                                </div>
-                                            </div>
-
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label for="nb_places" class="form-label">Places disponibles</label>
-                                                    <input type="number" class="form-control" id="nb_places" min="1" max="8" value="4">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="prix_personne" class="form-label">Prix par passager (€)</label>
-                                                    <input type="number" class="form-control" id="prix_personne" min="1" value="20">
-                                                </div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="vehiculeSelect" class="form-label">Véhicule</label>
-                                                <select class="form-select" id="vehiculeSelect">
-                                                    <option selected disabled>Sélectionner une voiture</option>
-                                                    <option value="add_new">Ajouter un véhicule</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="mb-4">
-                                                <h5>Préférences de voyage :</h5>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="form-check form-switch mb-3">
-                                                            <input class="form-check-input" type="checkbox" id="smokingPreference" checked>
-                                                            <label class="form-check-label" for="smokingPreference">Voyage non-fumeur</label>
+                                    <div class="mb-4">
+                                        <div class="card-body" id="createTripFormContainer" style="display: none;">
+                                            <form id="tripForm">  
+                                                <div class="row g-3">
+                                                    <div class="col-md-4 position-relative">
+                                                        <label class="form-label" for="departInput">Départ</label>
+                                                        <input type="text" class="form-control" id="departInput" autocomplete="off" name="adresseDepart" required>
+                                                        <!-- Liste des suggestions OpenStreetMap -->
+                                                        <div id="depart-results" 
+                                                            class="list-group position-absolute w-100">
                                                         </div>
-                                                        <div class="form-check form-switch mb-3">
-                                                            <input class="form-check-input" type="checkbox" id="animalsPreference">
-                                                            <label class="form-check-label" for="animalsPreference">Animaux acceptés</label>
+
+                                                    </div>
+
+                                                    <div class="col-md-4 position-relative">
+                                                    <label class="form-label" for="arriveeInput">Arrivée</label>
+                                                    <input type="text" class="form-control" id="arriveeInput" autocomplete="off" required name="adresseArrivee">
+                                                        <!-- Liste des suggestions OpenStreetMap -->
+                                                    <div id="arrivee-results" 
+                                                        class="list-group position-absolute w-100">
+                                                    </div>
+                                                    </div>
+                                                    
+                                                    <div class="col-md-2 position-relative">
+                                                        <label class="form-label" for="datetInput">Date</label>
+                                                        <input type="date" class="form-control" id="datetInput" name="dateDepart" required>
+                                                    <!-- Liste des suggestions OpenStreetMap -->
+                                                        <div id="date-results" class="list-group position-absolute w-100">
                                                         </div>
                                                     </div>
+                                                 
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <label for="seats" class="form-label">Places disponibles</label>
+                                                            <input type="number" class="form-control" id="seats" min="1" max="8" value="4" name="placeDisponible">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="price" class="form-label">Prix par passager (€)</label>
+                                                            <input type="number" class="form-control" id="price" min="1" value="20" name="prix">
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="description" class="form-label">Informations complémentaires</label>
+                                                        <textarea class="form-control" id="description" rows="3" name="description" placeholder="Précisez le lieu de rendez-vous, les arrêts possibles, etc."></textarea>
+                                                    </div>
+                                                    <div class="col-md-1 d-grid">
+                                                            <label class="form-label invisible" for="createTripBtn">.</label>
+                                                            <button type="button" class="btn btn-success" id="createTripBtn">Créer le trajet
+                                                            </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="description" class="form-label">Informations complémentaires</label>
-                                                <textarea class="form-control" id="description" rows="3" placeholder="Précisez le lieu de rendez-vous, les arrêts possibles, etc."></textarea>
-                                            </div>
-
-                                            <div class="text-end">
-                                                <button type="submit" name="trips" class="btn btn-primary">Publier le trajet</button>
-                                            </div>
-                                        </form>
+                                                <input 
+                                                    type="hidden" id="latitudeDepart">
+                                                    <input 
+                                                        type="hidden" id="longitudeDepart">
+                                                    <input 
+                                                        type="hidden" id="villeDepart">
+                                                    <input 
+                                                        type="hidden" id="latitudeArrivee">
+                                                    <input 
+                                                        type="hidden" id="longitudeArrivee">
+                                                    <input 
+                                                        type="hidden" id="villeArrivee">
+                                            </form>
+                                        </div>
                                     </div>
-                                </div>
+                        </div>
+                            
                     </div>
             </div>
         </div>

@@ -89,4 +89,12 @@ class CovoiturageRepository extends ServiceEntityRepository
         return null;
     }
     //change statut du covoiturage par le chauffeur
+   public function findByUser(User $user): array
+   {
+       return $this->createQueryBuilder('c')
+           ->where('c.chauffeur = :user')
+           ->setParameter('user', $user)
+           ->getQuery()
+           ->getResult();
+   }
 }

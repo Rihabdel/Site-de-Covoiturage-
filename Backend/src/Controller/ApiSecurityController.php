@@ -235,19 +235,34 @@ final class ApiSecurityController extends AbstractController
             }
 
             if (array_key_exists('isConducteur', $data)) {
-                $isConducteur = (bool)$data['isConducteur'];
-                $user->setIsConducteur($isConducteur);
 
-                $currentRoles = $user->getRoles();
-                if ($isConducteur) {
-                    if (!in_array('ROLE_CONDUCTEUR', $currentRoles)) {
-                        $currentRoles[] = 'ROLE_CONDUCTEUR';
-                    }
-                } else {
-                    $currentRoles = array_diff($currentRoles, ['ROLE_CONDUCTEUR']);
-                }
-                $user->setRoles(array_values($currentRoles));
-            }
+    $isConducteur = (bool) $data['isConducteur'];
+
+    $currentRoles = $user->getRoles();
+
+
+    if ($isConducteur) {
+
+        if (!in_array('ROLE_CONDUCTEUR', $currentRoles)) {
+            $currentRoles[] = 'ROLE_CONDUCTEUR';
+        }
+
+    } else {
+
+        $currentRoles = array_filter(
+            $currentRoles,
+            fn($role) => $role !== 'ROLE_CONDUCTEUR'
+        );
+
+    }
+
+    if (!in_array('ROLE_USER', $currentRoles)) {
+        $currentRoles[] = 'ROLE_USER';
+    }
+
+
+    $user->setRoles(array_values($currentRoles));
+}
 
             // Sauvegarde en base de données
             $user->setUpdatedAt(new \DateTimeImmutable());

@@ -1,5 +1,7 @@
 import { isConnected, getUserInfo } from './script.js';
-import { getMyTrips, cancelTrip , updateTripStatus, getTripById} from './api.js';
+import { getMyTrips, cancelTrip , updateTripStatus, getTripById , addTrip, getVehicules, updateUserInfo} from './api.js';
+import  { searchOpenStreetMap } from './openstreetmap.js';
+import { showSuggestions} from './recherche.js';
 export default async function initProfil() {
     console.log("Initialisation page trajets");
 
@@ -11,10 +13,11 @@ export default async function initProfil() {
     try {
         const userInfo = await getUserInfo();
         console.log("User info:", userInfo);
-        loadPlannedTrips(userInfo.id);
-        loadInProgressTrips(userInfo.id);
-        loadCompletedTrips(userInfo.id);
-       
+        loadPlannedTrips();
+        loadInProgressTrips();
+        loadCompletedTrips();
+        
+    
     }
     catch (error) {
         console.error("Erreur lors de la récupération des informations de l'utilisateur:", error);
@@ -22,15 +25,11 @@ export default async function initProfil() {
         initPlannedTripsButton();
         initInProgressTripsButtons();
         initCompletedTripsButtons();
-    }
-async function loadPlannedTrips(userId) {
+        initCreateTripButtons();
+}
+async function loadPlannedTrips() {
     try {
-        const userInfo = await getUserInfo();
-        if (userInfo && userInfo.id === userId) {
-            displayPlannedTrips(userInfo.plannedTrips);
-        } else {
-            console.error("L'ID de l'utilisateur ne correspond pas à l'ID fourni.");
-        }
+        await displayPlannedTrips();
     } catch (error) {
         console.error("Erreur lors de la récupération des informations de l'utilisateur:", error);
     }
@@ -46,10 +45,6 @@ export async function displayPlannedTrips() {
         return;
     }
     
-    if (!trips || trips.length === 0) {
-        plannedTrip.innerHTML = '<p>Aucun trajet prévu.</p>';
-        return;
-    }
     const visiblePlannedTrips = trips.filter(trip => trip.statut === 'planned' && trip.dateDepart >= new Date().toISOString() && trip.placeDisponible > 0);
     if (visiblePlannedTrips.length === 0) {
     plannedTrip.innerHTML = `
@@ -80,15 +75,15 @@ export async function displayPlannedTrips() {
                 
                 <div class="mb-1">
                     <i class="fas fa-road me-2"></i>
-                    <strong>Distance :</strong> ${trip.distance ?? 0} km
+                    <strong>Distance :</strong> ${trip.distance ?? 'pas disponible'} km
                 </div>
                 <div class="mb-1">
                     <i class="fas fa-users me-2"></i>
-                    <strong>Nombre de place disponibles :</strong> ${trip.placeDisponible ?? 0} places
+                    <strong>Nombre de place disponibles :</strong> ${trip.placeDisponible ?? 'pas disponible'} places
                 </div>
                 <div class="mb-1">
                     <i class="fas fa-euro-sign me-2"></i>
-                    <strong>Prix par personne :</strong> ${trip.prix ?? 0} €
+                    <strong>Prix par personne :</strong> ${trip.prix ?? 'pas disponible'} €
                 </div>
                 <div class="mb-1">
                     <i class="far fa-calendar me-2"></i>
@@ -122,6 +117,7 @@ export async function displayPlannedTrips() {
     `}).join('');
 }
 function initPlannedTripsButton() {
+    
     const plannedTrip = document.getElementById('planned-trip');
     if (!plannedTrip) {
         console.error("L'élément avec l'ID 'planned-trip' n'a pas été trouvé.");
@@ -135,7 +131,7 @@ function initPlannedTripsButton() {
                 await cancelTrip(tripId);
                 alert("Trajet annulé avec succès.");
                 const userInfo = await getUserInfo();
-                displayPlannedTrips(userInfo.plannedTrips);
+                displayPlannedTrips(userInfo.trajetsProposes);
             }
             catch (error) {
                 console.error("Erreur lors de l'annulation du trajet:", error);
@@ -162,18 +158,14 @@ function initPlannedTripsButton() {
     });
 }
 // onglet "En cours" pour afficher les trajets en cours
-async function loadInProgressTrips(userId) {
+async function loadInProgressTrips() {
     try {
-        const userInfo = await getUserInfo();
-        if (userInfo && userInfo.id === userId) {
-            displayInProgressTrips(userInfo.inProgressTrips);
-        } else {
-            console.error("L'ID de l'utilisateur ne correspond pas à l'ID fourni.");
-        }
+        await displayInProgressTrips();
     } catch (error) {
         console.error("Erreur lors de la récupération des informations de l'utilisateur:", error);
     }
 }
+
 export async function displayInProgressTrips() {
     const trips = await getMyTrips();
     console.log("Trajets en cours :", trips);
@@ -237,15 +229,11 @@ function initInProgressTripsButtons() {
     });
 }
 // onglet historique pour afficher les trajets terminés
-async function loadCompletedTrips(userId) {
+async function loadCompletedTrips() {
     try {
-        const userInfo = await getUserInfo();
-        if (userInfo && userInfo.id === userId) {
-            displayCompletedTrips(userInfo.completedTrips);
-        } else {
-            console.error("L'ID de l'utilisateur ne correspond pas à l'ID fourni.");
+          await  displayCompletedTrips();
         }
-    } catch (error) {
+    catch (error) {
         console.error("Erreur lors de la récupération des informations de l'utilisateur:", error);
     }
 }
@@ -372,3 +360,185 @@ export async function displayTripDetails(id) {
         }
     }
 }
+//creer un trajet
+
+// Fonction pour remplir la liste déroulante des véhicules
+async function fillVehiculeSelect(vehiculeId) {
+    try {
+        const vehicules = await getVehicules();
+        const vehiculeSelect = document.getElementById('vehiculeSelect');
+        if (!vehiculeSelect) {
+            console.error('Élément de sélection du véhicule introuvable.');
+            return;
+        }
+        vehiculeSelect.innerHTML = '';
+        vehicules.forEach(vehicule => {
+            const option = document.createElement('option');
+            option.value = vehicule.id;
+            option.textContent = vehicule.marque + ' ' + vehicule.modele;
+            vehiculeSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Erreur lors de la récupération des véhicules :", error);
+    }
+}
+
+async function initCreateTripButtons() {
+    const user = await getUserInfo();
+
+    if (!user) {
+        console.error("Impossible de récupérer les informations de l'utilisateur.");
+        return;
+    }
+    console.log("Rôles de l'utilisateur :", user.roles);
+
+    const becomeDriverBtn = document.getElementById('becomeDriverBtn');
+    const becomePassengerBtn = document.getElementById('becomePassengerBtn');
+
+    if (becomePassengerBtn && user.roles.includes("ROLE_CONDUCTEUR")) {
+        becomePassengerBtn.addEventListener('click', async () => {
+            try {
+                const result = await updateUserInfo({ isConducteur: false });
+                console.log("Utilisateur mis à jour (Passager) :", result);
+                // On réaffiche pour masquer le formulaire
+                await displayCreateTrip();
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
+                alert("Une erreur est survenue. Veuillez réessayer.");
+            }
+        });
+    }
+
+    if (becomeDriverBtn) {
+        becomeDriverBtn.addEventListener('click', async () => {
+            try {
+                const result = await updateUserInfo({ isConducteur: true });
+                console.log("Utilisateur mis à jour (Conducteur) :", result);
+                // IMPORTANT : On recharge l'affichage pour afficher le formulaire
+                await displayCreateTrip();
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
+                alert("Une erreur est survenue. Veuillez réessayer.");
+            }
+        });
+    }
+
+    // --- Autocomplétion OpenStreetMap ---
+    const departInput = document.getElementById("departInput");
+    const departResults = document.getElementById("depart-results");
+    const arriveeInput = document.getElementById("arriveeInput");
+    const arriveeResults = document.getElementById("arrivee-results");
+
+    if (departInput && departResults) {
+        departInput.addEventListener("input", async () => {
+            const results = await searchOpenStreetMap(departInput.value);
+            showSuggestions(results, departResults, departInput, "depart");
+        });
+    }
+
+    if (arriveeInput && arriveeResults) {
+        arriveeInput.addEventListener("input", async () => {
+            const results = await searchOpenStreetMap(arriveeInput.value);
+            showSuggestions(results, arriveeResults, arriveeInput, "arrivee");
+        });
+    }
+
+    // Initialisation du formulaire de soumission (gestion du clic de création)
+    initcreateTripForm();
+}
+
+async function displayCreateTrip() {
+    const userInfo = await getUserInfo();
+    const tripFormContainer = document.getElementById("createTripFormContainer");
+    const becomeDriverBtn = document.getElementById("becomeDriverBtn");
+    const becomePassengerBtn = document.getElementById("becomePassengerBtn");
+    if (!tripFormContainer || !becomeDriverBtn || !becomePassengerBtn) {
+        console.error("Éléments de formulaire manquants.");
+        return;
+    }
+    if (userInfo.roles.includes("ROLE_CONDUCTEUR")) {
+        tripFormContainer.style.display = "block";
+        becomeDriverBtn.style.display = "none";
+        becomePassengerBtn.style.display = "inline-block";
+    }
+    else {
+        tripFormContainer.style.display = "none";
+        becomeDriverBtn.style.display = "inline-block";
+        becomePassengerBtn.style.display = "none";
+    }
+    await fillVehiculeSelect();
+}
+async function initRoleSelection() {
+    const tripFormContainer = document.getElementById("createTripFormContainer");
+    const conducteurCheck = document.getElementById("editIsConducteurMain");
+    const passagerCheck = document.getElementById("editIsPassagerMain");
+
+    if (!tripFormContainer || !conducteurCheck || !passagerCheck) {
+        console.error("Éléments de sélection de rôles manquants.");
+        return;
+    }
+
+    const isConducteur = conducteurCheck.checked;
+    tripFormContainer.style.display = isConducteur ? "block" : "none";
+   
+    const data = {
+        isConducteur: conducteurCheck.checked,
+        isPassager: passagerCheck.checked
+    };
+
+    try {
+        const result = await updateUserInfo(data);
+        console.log("Rôles mis à jour :", result);
+        alert("Rôles mis à jour avec succès.");
+        await displayCreateTrip(); // Rafraîchit l'interface des trajets en fonction du rôle
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour des rôles :", error);
+        alert("Une erreur est survenue.");
+    }
+}
+
+// Fonction pour soumettre le formulaire de création de trajet
+async function initcreateTripForm() {
+    const createTripBtn = document.getElementById('createTripBtn');
+    const tripForm = document.getElementById('tripForm');
+
+    if (!tripForm || !createTripBtn) {
+        return; // Éléments pas encore présents ou hors contexte
+    }
+    
+    // Pour éviter de rajouter plusieurs fois l'écouteur si la fonction est rappelée
+    createTripBtn.replaceWith(createTripBtn.cloneNode(true));
+    const newCreateTripBtn = document.getElementById('createTripBtn');
+
+    newCreateTripBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        const VehiculeSelect = document.getElementById('vehiculeSelect');
+        const formData = new FormData(tripForm);
+        const data = {
+            adresseDepart: formData.get('adresseDepart'),
+            adresseArrivee: formData.get('adresseArrivee'),
+            dateDepart: formData.get('dateDepart'),
+            prix: formData.get('prix'),
+            placeDisponible: Number(formData.get('placeDisponible')),
+            vehicule: VehiculeSelect ? VehiculeSelect.value : null,
+        };
+
+        console.log("Données du formulaire de création de trajet :", data);
+        
+        try {
+            const result = await addTrip(data);
+            console.log("Résultat de la création du trajet :", result);
+            alert(result.message || "Trajet créé avec succès !");
+            tripForm.reset();
+            
+            const userInfo = await getUserInfo();
+            if (userInfo && typeof displayPlannedTrips === 'function') {
+                displayPlannedTrips(userInfo.trajetsProposes);
+            }
+        } catch (error) {
+            console.error("Erreur lors de la création du trajet:", error);
+            alert("Une erreur est survenue lors de la création du trajet.");
+        }
+    });
+}
+
