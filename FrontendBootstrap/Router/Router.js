@@ -1,4 +1,3 @@
-// Router/Router.js
 import Route from "./Route.js";
 import { allRoutes, websiteName } from "./allRoutes.js";
 import { showAndHideElementsForRoles, isConnected, getRole, waitForAuth } from "../js/script.js";
@@ -53,26 +52,21 @@ const checkAuthorization = (route) => {
 
 // Fonction pour charger le contenu
 const LoadContentPage = async () => {
-    if (isLoading) return;
-    
+    if (isLoading) return;    
     // Attendre que l'authentification soit prête au premier chargement
     if (!isInitialized) {
         console.log("Attente de l'initialisation de l'authentification...");
         await waitForAuth();
         isInitialized = true;
         console.log("Authentification prête - Rôle:", getRole(), "Connecté:", isConnected());
-    }
-    
-    const path = globalThis.location.pathname;
-    
+    } 
+    const path = globalThis.location.pathname;   
     if (lastPath === path && !window.forceReload) {
         console.log("Même page, pas de rechargement");
         return;
-    }
-    
+    }   
     isLoading = true;
-    lastPath = path;
-    
+    lastPath = path; 
     const actualRoute = getRouteByUrl(path);
     
     // Vérifier les autorisations
@@ -83,8 +77,7 @@ const LoadContentPage = async () => {
         isLoading = false;
         await LoadContentPage();
         return;
-    }
-    
+    }   
     try {
         console.log("Chargement du HTML :", actualRoute.pathHtml);
         const response = await fetch(actualRoute.pathHtml);
@@ -100,8 +93,7 @@ const LoadContentPage = async () => {
             mainPage.innerHTML = html;
         } else {
             console.error("Element #main-page non trouvé");
-        }
-        
+        }  
         // Charger le JS spécifique si présent
         if (actualRoute.pathJS && actualRoute.pathJS !== "") {
             try {
@@ -115,7 +107,6 @@ const LoadContentPage = async () => {
         }
         
         document.title = `${actualRoute.title} - ${websiteName}`;
-        
         // Mettre à jour l'affichage selon le rôle
         showAndHideElementsForRoles();
         

@@ -1,64 +1,82 @@
 @import 'custom';
 @import url("../node_modules/bootstrap-icons/font/bootstrap-icons.css");
 
+html {
+    position: relative;
+    min-height: 100%;
+}
 main {
-    margin-bottom: 100px;
+    margin-bottom: 80px;
 
 }
-p{
-   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-   font-size: 1rem;
+body {
+    background-color: $body-color;
+    font-family:'manrope', sans-serif;
+    font-size: 1rem;
+    margin: 0;
+    padding: 0;
 }
+h1, h3, h4, h5, h6 {
+    font-family: 'playfair display', serif;
+}
+h2 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 700;
+        font-family: 'playfair display', serif;
+    }
 a{
     text-decoration: none;
     color: $secondary;
     transition: color 0.3s;
 }
-html {
-    position: relative;
-    min-height: 100%;
-    
-}
+p {
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        max-width: 800px;
+        line-height: 1.6;
+        color: $dark;
+        font-family: 'manrope', sans-serif;
+
+    }
+
+    .btn {
+        font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+        padding: 0.7rem 1.5rem;
+    }
 /*navbar*/
 .navbar {
-    
     box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
-    padding: 10px 20px;
-   
+    padding: 12px 20px;
 }
-body {
-    background-color: $body-color;
-    
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-}
+
 .navbar-brand{  
-     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1.3rem;
+    font-family: 'manrope', sans-serif;
+   font-size: clamp(1.2rem, 2vw, 1.5rem);
     font-weight: 700;
     color:$dark !important;
 
 }
 .nav-link{
-     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1.1rem;
+     font-family: 'manrope', sans-serif;
+    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
     font-weight: 550;
     color:$dark !important;
 }
 .nav a{
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1.1rem;
+    font-family:  'manrope', sans-serif;
+    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
 }
 footer {
     position: absolute;
     background-color: $surface;
     width: 100%;
     color: white;
-    font-family: 'Hind Madurai', serif;
+    font-family: 'manrope', sans-serif;
     font-size: 0.9rem;
     padding: 20px 0;
 }
+
+
+
 .hero-scene {
     position: relative;
     &::before{
@@ -91,10 +109,14 @@ footer {
     
 }
 .about-us{
-    background: $primary ;
-    filter: brightness(1.2);
+     margin-top: 50px;
+    background-color: $card-bg;
+    text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    filter: brightness(0.7);
     color: white;
-    padding: 50px 0;
+    padding: 20px;
 }
 
 /* Features Section */
@@ -106,9 +128,9 @@ footer {
 }
         
         .section-title {
+            font-size: 2.5rem;
             text-align: center;
             margin-bottom: 50px;
-           
             color: $dark;
         }
         
@@ -120,9 +142,9 @@ footer {
         
         .feature-card {
             text-align: center;
-            background-color: $dark;
-            color: white;
+            background-color: $card-bg;
             padding: 30px;
+            color: $dark;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
@@ -142,7 +164,7 @@ footer {
         .feature-title {
             font-size: 1.5rem;
             margin-bottom: 15px;
-            color: var(--text);
+            color: $dark;
         }
 /*--connexion page */
 
@@ -258,6 +280,7 @@ footer {
         }
 
         //** Profil page */
+     
 //** Sidebar */
 .sidebar {
 
@@ -319,9 +342,10 @@ footer {
 .user-header {
     background: linear-gradient(135deg, $primary, #2ecc71);
     color: white;
+    
     border-radius: 10px;
     padding: 20px;
-    margin-bottom: 25px;
+    margin-top: 50px;
 }
 
 .credit-badge {
@@ -551,4 +575,11 @@ footer {
             padding: 20px;
             color: $dark;
 
+        }
+        .profil-container-fluid {
+          
+            background-color: $secondary;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 25px;
         }

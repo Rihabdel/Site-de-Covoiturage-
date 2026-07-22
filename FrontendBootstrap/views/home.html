@@ -2,53 +2,29 @@
     <div class="hero-scene-content">
         <h2>Covoiturez avec EcoRide</h2>
         <p>Réduisez votre empreinte carbone et vos frais de transport grâce à notre plateforme de covoiturage responsable</p>
-        <button id="btn" class="btn btn-primary">Chercher un trajet</button>
+        <a href="/recherche" class="btn btn-primary">Chercher un trajet</a>
     </div>
 </div>
-<!-- chercher un trajet -->
-<section class="search-section py-5 border rounded bg-light">
-    <div class="container">
-                <div class="row justify-content-center mt-3">
-                <div class="col-lg-8">
-                    <div class="search-form mb-4 ">
-                        <h3 class="mb-4 text-center mt-2">Trouvez votre trajet</h3>
-                        <form>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="adresseDepart" class="form-label">Départ</label>
-                                    <input type="text" class="form-control" id="adresseDepart" placeholder="Ville de départ">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="adresseArrivee" class="form-label">Arrivée</label>
-                                    <input type="text" class="form-control" id="adresseArrivee" placeholder="Ville d'arrivée">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="dateDepart" class="form-label">Date</label>
-                                    <input type="date" class="form-control" id="dateDepart">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="nbPlaces" class="form-label">Passagers</label>
-                                    <select class="form-select" id="nbPlaces">
-                                        <option value="1">1 passager</option>
-                                        <option value="2">2 passagers</option>
-                                        <option value="3">3 passagers</option>
-                                        <option value="4">4+ passagers</option>
-                                    </select>
-                                </div>
-                                <div class="col-12 mt-4">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-search me-2"></i>Rechercher un trajet
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+
+<!-- Section "Qui sommes-nous ?" -->
+    <section class="container about-us mb-5 py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="section-title">Qui sommes-nous ?</h2>
+                <p>EcoRide est une startup française engagée dans la réduction de l'impact environnemental des déplacements.</p>
+                <p>Notre mission est de proposer une alternative écologique et économique aux déplacements en voiture solo en favorisant le covoiturage pour tous les trajets du quotidien.</p>
+                <p>Chez EcoRide, nous croyons que chaque place occupée dans une voiture est une victoire pour notre planète et pour votre portefeuille.</p>
+                <div class="mt-4">
+                    <a href="#" class="btn btn-primary me-2">En savoir plus</a>
+                    <a href="#" class="btn btn-outline-primary">Nous contacter</a>
                 </div>
             </div>
-    </div>
-</section>
-<!-- Fin chercher un trajet -->
-      <!-- Features Section -->
+            <div class="col-lg-6">
+                <img src="../images/OIP.webp" class="img-fluid rounded shadow" alt="Équipe EcoRide">
+            </div>
+        </div>
+    </section>
+    <!-- Features -->
     <section class="features">
         <div class="container">
             <h2 class="section-title">Pourquoi choisir EcoRide ?</h2>
@@ -75,6 +51,125 @@
                     </div>
                     <h3 class="feature-title">Communautaire</h3>
                     <p>Rejoignez une communauté de conducteurs et passagers responsables</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Impact écologique -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <h2 class="section-title text-center mb-5">Notre impact environnemental</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="eco-impact">
+                        <i class="fas fa-cloud"></i>
+                        <h3>Réduction de CO₂</h3>
+                        <p>Chaque trajet partagé permet d'éviter en moyenne <span class="fw-bold">6.6 kg</span> de CO₂ rejetés dans l'atmosphère.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="eco-impact">
+                        <i class="fas fa-car"></i>
+                        <h3>Voitures en moins</h3>
+                        <p>Notre communauté a déjà permis de retirer <span class="fw-bold">12 500</span> voitures de la route.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="eco-impact">
+                        <i class="fas fa-tree"></i>
+                        <h3>Équivalent arbres</h3>
+                        <p>Depuis notre création, nous avons compensé l'équivalent de <span class="fw-bold">45 000</span> arbres plantés.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fonctionnalités -->
+    <section class="container my-5">
+        <h2 class="section-title text-center mb-5">Comment ça marche</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-img">
+                        <img src="" alt="Créer un compte">
+                    </div>
+                    <div class="p-4">
+                        <h3>1. Inscrivez-vous</h3>
+                        <p>Créez votre compte en quelques minutes et complétez votre profil pour commencer à covoiturer.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-img">
+                        <img src="" alt="Trouver un trajet">
+                    </div>
+                    <div class="p-4">
+                        <h3>2. Trouvez un trajet</h3>
+                        <p>Recherchez un trajet qui correspond à vos besoins ou proposez le vôtre à la communauté.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-img">
+                        <img src="" alt="Voyager ensemble">
+                    </div>
+                    <div class="p-4">
+                        <h3>3. Voyagez ensemble</h3>
+                        <p>Faites des économies, réduisez votre empreinte carbone et rencontrez des personnes passionnantes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Témoignages -->
+    <section class="container my-5">
+        <h2 class="section-title text-center mb-5">Ce que disent nos utilisateurs</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="testimonial-avatar">
+                            <img src="" alt="Marie">
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Marie L.</h5>
+                            <small>Utilisatrice depuis 1 an</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">"Grâce à EcoRide, j'ai réduit mes frais de transport de 60% et j'ai fait de belles rencontres. Une initiative écologique géniale !"</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="testimonial-avatar">
+                            <img src="" alt="Thomas">
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Thomas M.</h5>
+                            <small>Utilisateur depuis 2 ans</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">"En tant que conducteur régulier, je rentabilise mes trajets quotidiens tout en réduisant mon empreinte carbone. Que demander de plus ?"</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="testimonial-avatar">
+                            <img src="" alt="Sophie">
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Sophie D.</h5>
+                            <small>Utilisatrice depuis 6 mois</small>
+                        </div>
+                    </div>
+                    <p class="mb-0">"L'application est intuitive et le système de notation inspire confiance. Je me sens en sécurité lors de mes trajets."</p>
                 </div>
             </div>
         </div>
