@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -18,7 +18,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'covoiturage:read'])]
     #[ORM\Column]
     private ?int $id = null;
     #[Groups(['user:read', 'user:write'])]
@@ -52,16 +52,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read','covoiturage:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
-   
+   #[Groups(['user:read','covoiturage:read'])]
     #[ORM\Column(nullable: true)]
     private ?int $credits = null;
     
     #[ORM\Column(nullable: true)]
     private ?int $telephone = null;
-   
+   #[Groups(['user:read','covoiturage:read'])]
     #[ORM\Column]
     private ?bool $isConducteur = null;
-    
+    #[Groups(['user:read','covoiturage:read'])]
     #[ORM\Column]
     private ?bool $isPassager = null;
 
@@ -219,7 +219,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->pseudo;
     }
-  #[Groups(['covoiturage:read'])]
+ 
     public function setPseudo(string $pseudo): static
     {
         $this->pseudo = $pseudo;
@@ -301,7 +301,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-  #[Groups(['covoiturage:read'])]
+  
     public function isPassager(): ?bool
     {
         return in_array(
@@ -472,7 +472,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-     #[Groups(['user:read'])]
+    
     public function getNote(): ?int
     {
         return $this->note;

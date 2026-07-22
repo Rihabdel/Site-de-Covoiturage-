@@ -52,7 +52,7 @@ class Covoiturage
 #[Groups(['covoiturage:read'])]
     #[ORM\Column(type: 'string', enumType: Statut::class)]
     private ?Statut $statut =  Statut::PENDING;
-   #[Groups(['covoiturage:read', 'trajet:read'])]
+   #[Groups(['covoiturage:read'])]
     #[ORM\ManyToOne(inversedBy: 'trajetsProposes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $chauffeur = null;
@@ -74,7 +74,7 @@ class Covoiturage
     private Collection $avis;
 
   
-   
+    #[Groups(['covoiturage:read'])]
     #[ORM\OneToOne(inversedBy: 'covoiturage', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Trajet $trajet = null;
@@ -201,7 +201,7 @@ class Covoiturage
     /**
      * @return Collection<int, User>
      */
-    #[Groups(['covoiturage:read','trajet:read'])]
+    
     public function getPassagers(): Collection
     {
         return $this->passagers;

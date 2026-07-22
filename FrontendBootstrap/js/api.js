@@ -3,9 +3,6 @@ export const API_URL = "http://127.0.0.1:8000/api";
 
 // Récupération des infos utilisateur
 export async function getUserInfo() {
-     console.log("API_URL :", API_URL);
-    console.log("Token :", getApiToken());
-
     const myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getApiToken());
     const requestOptions = {
@@ -15,6 +12,8 @@ export async function getUserInfo() {
     const response = await fetch(`${API_URL}/user`, requestOptions);
     if (!response.ok) throw new Error(`Erreur ${response.status}`);
     return await response.json();
+  
+
 }
 // Mise à jour des infos utilisateur
 export async function updateUserInfo(updatedData) {
@@ -128,12 +127,9 @@ export async function getMyTrips() {
         method: "GET",
         headers: myHeaders,
     });
-
-    const data = await response.json();
-
-    console.log("Réponse /covoiturage/me :", data);
-
-    return data.data;
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+    return await response.json();
+    
 }
 // Récupération d'un trajet par son ID
 export async function getTripById(tripId) {
@@ -252,4 +248,24 @@ export async function addTrip(tripData) {
         console.error("Erreur lors de l'analyse de la réponse JSON :", error);
         throw new Error("Erreur lors de l'analyse de la réponse JSON");
     }
+}
+export async function startTrip(tripId) {
+    const response = await fetch(`${API_URL}/covoiturage/${tripId}/start`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "X-AUTH-TOKEN": getApiToken()
+        }
+    });
+    return await response.json();
+}
+export async function endTrip(tripId) {
+    const response = await fetch(`${API_URL}/covoiturage/${tripId}/terminate`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "X-AUTH-TOKEN": getApiToken()
+        }
+    });
+    return await response.json();
 }

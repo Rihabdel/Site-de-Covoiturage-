@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Entity\Covoiturage;
 use App\Entity\User;
 use App\Repository\VehiculeRepository;
+use App\Repository\UserRepository;
 use App\Enum\Statut;
 use App\Entity\trajet;
 use App\Service\GeocodingService;
@@ -107,20 +108,12 @@ final class CovoiturageController extends AbstractController
 
         // 3 - Filtres sur les résultats
         $prixMax = $request->query->get('prixMax');
-        $dureeMax = $request->query->get('dureeMax');
         $note = $request->query->get('note');
         $ecologique = $request->query->get('ecologique');
 
 
         $covoiturages = array_values(array_filter(
-            $covoiturages,
-            function ($covoiturage) use (
-                $prixMax,
-                $dureeMax,
-                $note,
-                $ecologique
-            ) {
-
+            $covoiturages,function ($covoiturage) use ($prixMax, $note, $ecologique) {
                 // Prix maximum
                 if ($prixMax !== null 
                     && $covoiturage->getPrix() > (float)$prixMax) {
@@ -264,20 +257,32 @@ final class CovoiturageController extends AbstractController
         response: 500,
         description: "Erreur lors de la récupération des covoiturages"
     )]
-    public function getMyCovoiturages(#[CurrentUser] User $user, CovoiturageRepository $repo): Response
-    {
-        if (!$user) {
-            return $this->json(['message' => 'Unauthorized'], 401);
-        }
-        // Récupérer les covoiturages de l'utilisateur connecté
-        $data= $repo->findBy(['chauffeur' => $user]);
-        if (!$data) {
-            return $this->json(['message' => 'Aucun covoiturage trouvé pour cet utilisateur'], 404);
-        }
-        return $this->json([
-            'data' => $data
-        ], 200, [], ['groups' => 'covoiturage:read', 'trajet:read']);
-    }
+    public function mesTrajets (#[CurrentUser] User $user,CovoiturageRepository $repository): JsonResponse
+{
+
+    $proposes = $repository->findBy([
+        'chauffeur' => $user
+    ]);
+
+
+    $participes = $repository->findParticipationsByUser($user);
+
+
+    $trips = array_merge(
+        $proposes,
+        $participes
+    );
+
+
+    return $this->json(
+        $trips,
+        200,
+        [],
+        [
+            'groups' => ['covoiturage:read']
+        ]
+    );
+}
 
 
 // mettre à jour le statut d'un covoiturage
@@ -805,6 +810,163 @@ public function create(Request $request, #[CurrentUser] User $user, EntityManage
         $em->flush();
 
         return $this->json($covoiturage, 200, [], ['groups' => 'covoiturage:read']);
+    }
+
+    #[Route('/{id}/start', name: 'start_covoiturage', methods: ['PATCH'])]
+    #[OA\Patch(
+        tags: ["Covoiturage"],
+        summary: "Démarrer un covoiturage",
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                description: "ID du covoiturage à démarrer",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Covoiturage démarré avec succès"
+    )]
+    #[OA\Response(
+        response: 400,
+        description: "Requête invalide (covoiturage déjà démarré ou terminé)"
+    )]
+    #[OA\Response(
+        response: 403,
+        description: "Seul le chauffeur peut démarrer le covoiturage"
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Covoiturage introuvable"
+    )]
+    #[IsGranted('ROLE_CONDUCTEUR', message: 'Seul le chauffeur peut démarrer le covoiturage')]
+    public function startCovoiturage(int $id, #[CurrentUser] User $user, EntityManagerInterface $em): JsonResponse
+    {
+        $covoiturage = $this->covoiturageRepository->find($id);
+
+        if (!$covoiturage) {
+            return $this->json(['message' => 'Covoiturage introuvable'], 404);
+        }
+
+        // Vérifier si l'utilisateur est le chauffeur
+        if ($covoiturage->getChauffeur() !== $user) {
+            return $this->json(['message' => 'Seul le chauffeur peut démarrer le covoiturage'], 403);
+        }
+
+        // Vérifier si le covoiturage est déjà démarré ou terminé
+        $depart = $covoiturage->getDateDepart();
+        $autorisation = (clone $depart)->modify('-15 minutes');
+        // verifier la date de départ correspond à la date actuelle
+        $now = new \DateTime();
+        if ($covoiturage->getDateDepart() > $now) {
+            return $this->json(['message' => 'Le covoiturage ne peut pas être démarré avant la date de départ prévue'], 400);
+        }
+        if ($now < $autorisation) {
+            return $this->json([
+                'message' => 'Vous ne pouvez démarrer le trajet que 15 minutes avant.'
+            ], 400);
+        }
+        
+        // Démarrer le covoiturage
+        $covoiturage->setStatut(Statut::STARTED);
+        // Mettre à jour la date de départ réelle
+        $covoiturage->setDateDepart(new \DateTime());
+        // Mettre à jour la date d'arrivée réelle en fonction de la durée du trajet
+        $trajet = $covoiturage->getTrajet();
+       
+        //ajouter duree en temps réel à la date de départ pour obtenir la date d'arrivée réelle
+        $duree = new \DateInterval('PT' . $trajet->getDuree() . 'M');
+        $covoiturage->setDateArrivee((clone $covoiturage->getDateDepart())->add($duree));
+        
+        // Débiter les crédits des passagers
+        foreach ($covoiturage->getPassagers() as $passager) {
+            if ($passager->getCredits() < $covoiturage->getPrix()) {
+            return $this->json([
+                'message' => sprintf(
+                    'Le passager %s ne possède pas assez de crédits.',
+                    $passager->getPseudo()
+                )
+            ], 400);
+        }
+            $passager->setCredits($passager->getCredits() - (int) $covoiturage->getPrix());
+            $em->persist($passager);
+        }
+        
+
+        // Persist the covoiturage entity
+        $em->persist($covoiturage);
+        $em->flush();
+
+        return $this->json(['message' => 'Covoiturage démarré avec succès'], 200);
+    }
+    //  terminer le covoiturage
+    #[Route('/{id}/terminate', name: 'terminate_covoiturage', methods: ['PATCH'])]
+    #[OA\Patch(
+        tags: ["Covoiturage"],
+        summary: "Terminer un covoiturage",
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                description: "ID du covoiturage à terminer",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Covoiturage terminé avec succès"
+    )]
+    #[OA\Response(
+        response: 400,
+        description: "Requête invalide (covoiturage déjà terminé ou pas encore démarré)"
+    )]
+    #[OA\Response(
+        response: 403,
+        description: "Seul le chauffeur peut terminer le covoiturage"
+    )]
+    #[OA\Response(
+        response: 404,
+        description: "Covoiturage introuvable"
+    )]
+    #[IsGranted('ROLE_CONDUCTEUR', message: 'Seul le chauffeur peut terminer le covoiturage')]
+    public function terminateCovoiturage(int $id, #[CurrentUser] User $user, EntityManagerInterface $em): JsonResponse
+    {
+        $covoiturage = $this->covoiturageRepository->find($id);
+
+        if (!$covoiturage) {
+            return $this->json(['message' => 'Covoiturage introuvable'], 404);
+        }
+
+        // Vérifier si l'utilisateur est le chauffeur
+        if ($covoiturage->getChauffeur() !== $user) {
+            return $this->json(['message' => 'Seul le chauffeur peut terminer le covoiturage'], 403);
+        }
+
+        // Vérifier si le covoiturage est déjà terminé ou pas encore démarré
+        if ($covoiturage->getStatut() === Statut::COMPLETED) {
+            return $this->json(['message' => 'Le covoiturage est déjà terminé'], 400);
+        }
+        if ($covoiturage->getStatut() !== Statut::STARTED) {
+            return $this->json(['message' => 'Le covoiturage n\'a pas encore démarré'], 400);
+        }
+
+        // Terminer le covoiturage
+        $covoiturage->setStatut(Statut::COMPLETED);
+        // Mettre à jour la date d'arrivée réelle
+        $covoiturage->setDateArrivee(new \DateTime());
+       
+        // confirmation par mail ou notification push peut être ajoutée ici pour informer les passagers que le covoiturage est terminé
+        
+        // Persist the covoiturage entity
+        $em->persist($covoiturage);
+        $em->flush();
+
+        return $this->json(['message' => 'Covoiturage terminé avec succès'], 200);
     }
 
 }

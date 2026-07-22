@@ -1,5 +1,5 @@
 import { isConnected, getUserInfo } from './script.js';
-import { getMyTrips, cancelTrip , updateTripStatus, getTripById , addTrip, getVehicules, updateUserInfo} from './api.js';
+import { getMyTrips, cancelTrip , updateTripStatus, getTripById , addTrip, getVehicules, updateUserInfo , startTrip , endTrip} from './api.js';
 import  { searchOpenStreetMap } from './openstreetmap.js';
 import { showSuggestions} from './recherche.js';
 export default async function initProfil() {
@@ -16,8 +16,6 @@ export default async function initProfil() {
         loadPlannedTrips();
         loadInProgressTrips();
         loadCompletedTrips();
-        
-    
     }
     catch (error) {
         console.error("Erreur lors de la récupération des informations de l'utilisateur:", error);
@@ -36,85 +34,116 @@ async function loadPlannedTrips() {
 }
 export async function displayPlannedTrips() {
 
-    const trips = await getMyTrips();
-    console.log("Trajets prévus :", trips);
+    try {
+        const trips = await getMyTrips();
+        const userInfo = await getUserInfo();
+        const plannedTrip = document.getElementById('planned-trip');
+        if (!plannedTrip) {
+            console.error("L'élément avec l'ID 'planned-trip' n'a pas été trouvé.");
+            return;
+        }
+        const visiblePlannedTrips = trips.filter(trip => {
 
-    const plannedTrip = document.getElementById('planned-trip');
-    if (!plannedTrip) {
-        console.error("L'élément avec l'ID 'planned-trip' n'a pas été trouvé.");
-        return;
-    }
-    
-    const visiblePlannedTrips = trips.filter(trip => trip.statut === 'planned' && trip.dateDepart >= new Date().toISOString() && trip.placeDisponible > 0);
-    if (visiblePlannedTrips.length === 0) {
-    plannedTrip.innerHTML = `
-        <div class="alert alert-info text-center">
-            Aucun trajet planifié.
-        </div>
-    `;
-    return;
-    }
-    plannedTrip.innerHTML = visiblePlannedTrips.map(trip => {
+            const isPassager = trip.passagers
+                ? trip.passagers.some(passager => passager.id === userInfo.id) : false;
+            const isConducteur = trip.chauffeur.id === userInfo.id;
+            return (
+                trip.statut === 'planned' && new Date(trip.dateDepart) >= new Date() &&
+                trip.placeDisponible > 0 && (isConducteur || isPassager)
+            );
+        });
+        if (visiblePlannedTrips.length === 0) {
+            plannedTrip.innerHTML = `
+                <div class="alert alert-info text-center">
+                    Aucun trajet planifié.
+                </div>
+            `;
+            return;
+        }
+
+        plannedTrip.innerHTML = visiblePlannedTrips.map(trip => {
             const date = new Date(trip.dateDepart);
             const dateFormatee = date.toLocaleDateString('fr-FR');
-        const heureDepart = new Date(trip.dateDepart).toLocaleTimeString('fr-FR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        const heureArrivee = new Date(trip.dateArrivee).toLocaleTimeString('fr-FR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+            const heureDepart = new Date(trip.dateDepart)
+                .toLocaleTimeString('fr-FR', { hour: '2-digit',minute: '2-digit'});
+            const heureArrivee = new Date(trip.dateArrivee)
+                .toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            const isConducteur = trip.chauffeur.id === userInfo.id;
+            const typeTrajet = isConducteur
+                ? `
+                    <div class="badge bg-success mb-2">
+                        Vous proposez ce trajet
+                    </div>
+                `:
+                `
+                    <div class="badge bg-info mb-2">
+                        Vous participez à ce trajet
+                    </div>
+                `;
 
-        return `
-        <div class="row align-items-center planned-trip mb-3">
-            
-            <div class="col-md-8 ">
-                <h5 class="card-title">${trip.adresseDepart} → ${trip.adresseArrivee}</h5>
-                    <p class="card-text">${dateFormatee} à ${heureDepart}</p>
-                
-                <div class="mb-1">
-                    <i class="fas fa-road me-2"></i>
-                    <strong>Distance :</strong> ${trip.distance ?? 'pas disponible'} km
-                </div>
-                <div class="mb-1">
-                    <i class="fas fa-users me-2"></i>
-                    <strong>Nombre de place disponibles :</strong> ${trip.placeDisponible ?? 'pas disponible'} places
-                </div>
-                <div class="mb-1">
-                    <i class="fas fa-euro-sign me-2"></i>
-                    <strong>Prix par personne :</strong> ${trip.prix ?? 'pas disponible'} €
-                </div>
-                <div class="mb-1">
-                    <i class="far fa-calendar me-2"></i>
-                    <strong>Horaire :</strong> ${heureDepart} → ${heureArrivee}
-                </div>
-                <div class="mb-1">
-                </div>
-                <div class="mb-1">
-                    <i class="fas fa-leaf me-2"></i>
-                    <strong>Voyage écologique :</strong> ${trip.voyageEcologique ? 'Oui' : 'Non'}
-                </div>
-                <div class="mb-1">
-                <i class="fas fa-user me-2"></i>
-                    <strong>Passagers :</strong> ${trip.passagers.length > 0 ? trip.passagers.map(passager => passager.pseudo).join(', ') : ' Aucun passager'   }
+            return `
+            <div class="card mb-3 planned-trip">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title">${trip.adresseDepart} →${trip.adresseArrivee}</h5>
+                            <p><i class="far fa-calendar"></i>${dateFormatee} à ${heureDepart}</p>
+                            <div class="mb-1">
+                                <i class="fas fa-users me-2"></i><strong>Places disponibles :</strong>
+                                ${trip.placeDisponible}
+                            </div>
+                            <div class="mb-1">
+                                <i class="fas fa-euro-sign me-2"></i><strong>Prix :</strong>
+                                ${trip.prix} €
+                            </div>
+                            <div class="mb-1">
+                                <i class="far fa-clock me-2"></i><strong>Horaire :</strong>
+                                ${heureDepart} → ${heureArrivee}
+                            </div>
+                            <div class="mb-1">
+                                <i class="fas fa-leaf me-2"></i>
+                                <strong>Voyage écologique :</strong>${trip.voyageEcologique ? 'Oui' : 'Non'}
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">${typeTrajet}
+                            <p><span class="badge bg-primary">${trip.statut}</span>
+                            </p>
+                            <p>
+                                <i class="fas fa-user me-2"></i>
+                                <strong>Conducteur :</strong>${trip.chauffeur.pseudo}
+                            </p>
+                            <div class="mt-3">
+                                ${isConducteur ?
+                                    `
+                                    <button 
+                                        class="btn btn-primary btn-sm start-trip" data-id="${trip.id}">Démarrer
+                                    </button>
+                                    <button 
+                                        class="btn btn-danger btn-sm cancel-trip" data-id="${trip.id}">Annuler
+                                    </button>
+                                    `:
+                                    `
+                                    <button 
+                                        class="btn btn-danger btn-sm leave-trip" data-id="${trip.id}">Quitter le trajet
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4 text-md-end">
-                <p><span class="trip-status status-planned" id="trip-status">${trip.statut}</span></p>
-                <p class="card-text"><strong><i class="fas fa-user me-2"></i> Conducteur :</strong> ${trip.chauffeur.pseudo} </p>
-                    <div class="mt-2">
-                        <button class="btn btn-primary btn-sm start-trip" data-id="${trip.id}">
-                            Démarrer
-                        </button>
-                        <button class="btn btn-danger cancel-trip btn-sm" data-id="${trip.id}">
-                            Annuler
-                        </button>
-                </div>
-            </div>
-            
-        </div>
-    `}).join('');
+            `;
+        }).join('');
+
+
+    } catch (error) {
+
+        console.error(
+            "Erreur lors de l'affichage des trajets planifiés :",
+            error
+        );
+
+    }
 }
 function initPlannedTripsButton() {
     
@@ -130,8 +159,8 @@ function initPlannedTripsButton() {
             try {
                 await cancelTrip(tripId);
                 alert("Trajet annulé avec succès.");
-                const userInfo = await getUserInfo();
-                displayPlannedTrips(userInfo.trajetsProposes);
+            
+                displayPlannedTrips();
             }
             catch (error) {
                 console.error("Erreur lors de l'annulation du trajet:", error);
@@ -143,14 +172,14 @@ function initPlannedTripsButton() {
             const button = event.target;
              try {
                 console.log("Démarrage du trajet avec l'ID :", tripId);
-            const result = await updateTripStatus(tripId, {statut: "in_progress"});
-
+            const result = await startTrip(tripId);
+                console.log("Résultat du démarrage du trajet :", result);
             alert(result.message);
 
             // changer le texte du bouton
             button.textContent = "En cours";
             button.disabled = true;
-
+                await displayInProgressTrips();
         } catch (e) {
             alert(e.message);
         }
@@ -165,7 +194,7 @@ async function loadInProgressTrips() {
         console.error("Erreur lors de la récupération des informations de l'utilisateur:", error);
     }
 }
-
+//affichage des trajets en cours
 export async function displayInProgressTrips() {
     const trips = await getMyTrips();
     console.log("Trajets en cours :", trips);
@@ -212,14 +241,15 @@ function initInProgressTripsButtons() {
             const tripId = event.target.dataset.id;
             const button = event.target;
             try {
-            const result = await updateTripStatus(tripId, {statut: "completed"});
+            const result = await endTrip(tripId);
+            console.log("Résultat de la fin du trajet :", result);
 
             alert(result.message);
             button.textContent = "Terminé";
             button.disabled = true;
             button.classList.remove("btn-success");
             button.classList.add("btn-secondary");
-            await displayInProgressTrips();
+            displayCompletedTrips();
 
 
         } catch (e) {
@@ -284,6 +314,7 @@ export async function displayCompletedTrips() {
             </div>    
     `}).join('');
 }
+//
 function initCompletedTripsButtons() {
     const historyTrip = document.getElementById('history-trip');
     if (!historyTrip) {
@@ -292,13 +323,12 @@ function initCompletedTripsButtons() {
     }
     
     historyTrip.addEventListener('click', async (event) => {
-     
+    
             const detailButton = event.target.closest('.details-trip');
             if (detailButton) {
                 const tripId = detailButton.dataset.id;
                 console.log("Afficher les détails du trajet avec l'ID :", tripId);
                 if (!tripId) return;
-   
             try {
             const modalEl = document.getElementById('tripDetailsModal');
             const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -390,8 +420,6 @@ async function initCreateTripButtons() {
         console.error("Impossible de récupérer les informations de l'utilisateur.");
         return;
     }
-    console.log("Rôles de l'utilisateur :", user.roles);
-
     const becomeDriverBtn = document.getElementById('becomeDriverBtn');
     const becomePassengerBtn = document.getElementById('becomePassengerBtn');
 
@@ -400,7 +428,6 @@ async function initCreateTripButtons() {
             try {
                 const result = await updateUserInfo({ isConducteur: false });
                 console.log("Utilisateur mis à jour (Passager) :", result);
-                // On réaffiche pour masquer le formulaire
                 await displayCreateTrip();
             } catch (error) {
                 console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
@@ -414,7 +441,6 @@ async function initCreateTripButtons() {
             try {
                 const result = await updateUserInfo({ isConducteur: true });
                 console.log("Utilisateur mis à jour (Conducteur) :", result);
-                // IMPORTANT : On recharge l'affichage pour afficher le formulaire
                 await displayCreateTrip();
             } catch (error) {
                 console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
@@ -422,7 +448,6 @@ async function initCreateTripButtons() {
             }
         });
     }
-
     // --- Autocomplétion OpenStreetMap ---
     const departInput = document.getElementById("departInput");
     const departResults = document.getElementById("depart-results");
@@ -435,15 +460,12 @@ async function initCreateTripButtons() {
             showSuggestions(results, departResults, departInput, "depart");
         });
     }
-
     if (arriveeInput && arriveeResults) {
         arriveeInput.addEventListener("input", async () => {
             const results = await searchOpenStreetMap(arriveeInput.value);
             showSuggestions(results, arriveeResults, arriveeInput, "arrivee");
         });
     }
-
-    // Initialisation du formulaire de soumission (gestion du clic de création)
     initcreateTripForm();
 }
 
