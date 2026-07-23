@@ -1,4 +1,6 @@
-export const API_URL = 'http://127.0.0.1:8000/api'; 
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import './Router/Router.js';
+export const API_URL = 'https://ecoride-api.onrender.com/api'; 
 export const roleCookieName = 'role'; 
 
 // ------------------------------------

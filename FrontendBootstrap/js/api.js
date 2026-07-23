@@ -1,9 +1,9 @@
-import { getApiToken} from './script.js';
+import { getApiToken} from '../script.js';
 export const API_URL = "https://ecoride-api.onrender.com/api";
 
 // Récupération des infos utilisateur
 export async function getUserInfo() {
-    const myHeaders = new Headers();
+    const myHeaders = new Headers();di
     myHeaders.append("X-AUTH-TOKEN", getApiToken());
     const requestOptions = {
         method: "GET",

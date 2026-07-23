@@ -1,4 +1,4 @@
-import { isConnected, getUserInfo } from './script.js';
+import { isConnected, getUserInfo } from '../script.js';
 import { getMyTrips, cancelTrip , updateTripStatus, getTripById , addTrip, getVehicules, updateUserInfo , startTrip , endTrip} from './api.js';
 import  { searchOpenStreetMap } from './openstreetmap.js';
 import { showSuggestions} from './recherche.js';

@@ -1,4 +1,4 @@
-import { showAndHideElementsForRoles, signout, isConnected } from '../script.js';
+import { showAndHideElementsForRoles, signout, isConnected } from '../../script.js';
 import { getUserInfo, updateUserInfo , deleteUserAccount ,addVehicule ,getVehicules , updateVehicule, deleteVehicule , getVehiculeById} from '../api.js';
 
 export default async function initProfil() {
