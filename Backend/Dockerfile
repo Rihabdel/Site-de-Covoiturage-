@@ -10,6 +10,13 @@ COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY . /var/www/html
-
 WORKDIR /var/www/html
+
+COPY . .
+# Installation des dépendances Symfony
+RUN composer install --no-dev --optimize-autoloader
+
+# Cache Symfony production
+RUN php bin/console cache:clear --env=prod
+
+EXPOSE 80
