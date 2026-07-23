@@ -1,5 +1,5 @@
 import { getApiToken} from './script.js';
-export const API_URL = "http://127.0.0.1:8000/api";
+export const API_URL = "https://ecoride-api.onrender.com/api";
 
 // Récupération des infos utilisateur
 export async function getUserInfo() {
