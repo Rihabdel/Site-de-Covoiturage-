@@ -25,7 +25,4 @@ COPY . .
 # Installation des dépendances Symfony
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Cache Symfony production
-RUN php bin/console cache:clear --env=prod
-
 EXPOSE 80
