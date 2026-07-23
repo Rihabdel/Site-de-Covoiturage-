@@ -8,5 +8,7 @@ RUN npm install
 
 # On copie le reste du code frontend
 COPY . .
+RUN npm run build
 
 EXPOSE 5173
+CMD ["npm", "run", "preview"]
