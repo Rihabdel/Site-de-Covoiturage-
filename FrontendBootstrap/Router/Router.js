@@ -159,6 +159,6 @@ if (document.readyState === 'loading') {
 );
 } else {
     document.body.addEventListener('click', routeEvent);
-    await LoadContentPage();
+     LoadContentPage();
 }
 
