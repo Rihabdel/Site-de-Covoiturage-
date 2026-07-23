@@ -1,6 +1,6 @@
 import Route from "./Route.js";
 import { allRoutes, websiteName } from "./allRoutes.js";
-import { showAndHideElementsForRoles, isConnected, getRole, waitForAuth } from "../script.js";
+import { showAndHideElementsForRoles, isConnected, getRole, waitForAuth } from "../js/script.js";
 
 // Création d'une route pour la page 404
 const route404 = new Route("404", "Page introuvable", "/pages/404.html", "", []);
@@ -153,10 +153,8 @@ globalThis.route = routeEvent;
 // Initialisation au chargement de la page
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        document.body.addEventListener('click', routeEvent);
         LoadContentPage();
-    });
-} else {
-    LoadContentPage();
+    }
+);
 }
-
-export { LoadContentPage };

@@ -1,4 +1,4 @@
-import { getApiToken} from '../script.js';
+import { getApiToken} from './script.js';
 export const API_URL = "https://ecoride-api.onrender.com/api";
 
 // Récupération des infos utilisateur

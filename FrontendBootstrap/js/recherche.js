@@ -1,5 +1,5 @@
 import { getTrips , getTripById, participerCovoiturage  } from './api.js';
-import { isConnected } from '../script.js';
+import { isConnected } from './script.js';
 import  { searchOpenStreetMap } from './openstreetmap.js';
 
 export default function initRecherche() {
