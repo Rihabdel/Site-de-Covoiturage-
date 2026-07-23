@@ -1,8 +1,17 @@
 FROM php:8.2-apache
 
-# la dépendance système avant d'installer l'extension PHP
-RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql
+# Dépendances système + extensions PHP nécessaires à Symfony
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    unzip \
+    git \
+    libzip-dev \
+    libicu-dev \
+    && docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    zip \
+    intl
 ## Activation du module rewrite d'Apache
 RUN a2enmod rewrite
 
