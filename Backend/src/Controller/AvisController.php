@@ -85,7 +85,7 @@ final class AvisController extends AbstractController
             }
         }
         // auteur de l'avis est l'utilisateur actuellement connecté et a participé au covoiturage
-        $user = $this->getAuteur();
+        $user = $this->getUser();
         $covoiturage = $entityManager->getRepository(Covoiturage::class)->find($data['covoiturageId']);
         if (!$covoiturage) {
             return new JsonResponse(['message' => 'Covoiturage introuvable'], 404);
@@ -108,19 +108,14 @@ final class AvisController extends AbstractController
         if ($existingAvis) {
             return new JsonResponse(['message' => 'Avis déjà existant'], 400);
         }
-        $avis = new Avis();
-        $avis->setNote($data['note']);
-        $avis->setComment($data['commentaire']);
-        $avis->setCovoiturage($covoiturage);
-        $avis->setIsValidated(false);
-        $avis->setCreatedAt(new \DateTimeImmutable());
-        $entityManager->persist($avis);
-        $entityManager->flush();
-        return new JsonResponse([
-            'id' => $avis->getId(),
-            'note' => $avis->getNote(),
-            'commentaire' => $avis->getCommentaire(),
-        ], Response::HTTP_CREATED);
+        $collection->insertOne([
+            'covoiturageId' => $data['covoiturageId'],
+            'auteurId' => $this->getUser()->getId(),
+            'note' => $data['note'],
+            'commentaire' => $data['commentaire'],
+            'statut' => 'en_attente'
+        ]);
+     return new JsonResponse(['message' => 'Avis ajouté avec succès'], 201);
     }
 
     #[Route('', name: 'show', methods: ['GET'])]

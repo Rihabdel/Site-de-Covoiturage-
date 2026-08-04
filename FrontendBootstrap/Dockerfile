@@ -1,14 +1,10 @@
-FROM node:20-alpine
+FROM nginx:alpine
+# Copie les fichiers de l'application dans le répertoire par défaut de Nginx
+COPY . /usr/share/nginx/html
 
-WORKDIR /app
-
-# On copie les fichiers de configuration pour installer les dépendances
-COPY package*.json ./
-RUN npm install
-
-# On copie le reste du code frontend
-COPY . .
-RUN npm run build
-
-EXPOSE 5173
-CMD ["npm", "run", "preview"]
+# Copie le fichier de configuration Nginx personnalisé
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Expose le port 80 pour accéder à l'application
+EXPOSE 80
+# Démarre Nginx en mode non détaché
+CMD ["nginx", "-g", "daemon off;"]

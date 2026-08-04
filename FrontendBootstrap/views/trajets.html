@@ -1,61 +1,69 @@
 <!-- Onglet Trajets -->
 <div class="container mb-5">
-        <div class="user-header">
-            <div class="row align-items-center" id="user-header">
+    <div class="user-header">
+        <div class="row align-items-center" id="user-header">
             <div class=" text-center">
                 <h2 class="user-initials">Mes covoiturages</h2>
             </div>
-            </div>
-        </div>        
-        <div class="row profil-container-fluid">
+        </div>
+    </div>
+    <div class="row profil-container-fluid">
         <!-- Sidebar -->
-            <div class="col-12 col-md-3 col-lg-2 mb-3">
-                            <div class="nav nav-pills me-3 flex-md-column flex-row sidebar" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                                    <button class="nav-link active" id="v-pills-trajets-tab" data-bs-toggle="pill" data-bs-target="#v-pills-trajets" type="button" role="tab" aria-controls="v-pills-trajets" aria-selected="true">Trajets</button>
-                                    <button class="nav-link" id="v-pills-create-tab" data-bs-toggle="pill" data-bs-target="#v-pills-create" type="button" role="tab" aria-controls="v-pills-historique" aria-selected="false">Ajouter </button>
+        <div class="col-12 col-md-3 col-lg-2 mb-3">
+            <div class="nav nav-pills me-3 flex-md-column flex-row sidebar" id="v-pills-tab" role="tablist"
+                aria-orientation="vertical">
+                <button class="nav-link active" id="v-pills-trajets-tab" data-bs-toggle="pill"
+                    data-bs-target="#v-pills-trajets" type="button" role="tab" aria-controls="v-pills-trajets"
+                    aria-selected="true">Trajets</button>
+                <button class="nav-link" id="v-pills-create-tab" data-bs-toggle="pill" data-bs-target="#v-pills-create"
+                    type="button" role="tab" aria-controls="v-pills-historique" aria-selected="false">Ajouter </button>
+            </div>
+        </div>
+        <div class="tab-content col-12 col-md-9 col-lg-10" id="v-pills-tabContent">
+            <!-- Contenu des onglets -->
+            <div class="tab-pane fade show active" id="v-pills-trajets" role="tabpanel"
+                aria-labelledby="v-pills-trajets-tab" tabindex="-1">
+                <h3 class="section-title">Mes trajets</h3>
+                <ul class="nav nav-tabs" id="myTripsTab">
+                    <li class="nav-item">
+                        <button class="nav-link " id="history-tab" data-bs-toggle="tab" data-bs-target="#history"
+                            type="button" role="tab">Terminé</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link active" id="planned-tab" data-bs-toggle="tab" data-bs-target="#planned"
+                            type="button" role="tab">Planifiés</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="inprogress-tab" data-bs-toggle="tab" data-bs-target="#inprogress"
+                            type="button" role="tab">En cours</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-4" id="myTripsTabContent">
+                    <!-- Trajets Planifiés -->
+                    <div class="tab-pane fade show active" id="planned" role="tabpanel">
+                        <div class="row align-items-center" id="planned-trip">
+                            <div class="col-md-8">
+                                <h5>Trajet :</h5>
+                                <p class="mb-1"><i class="far fa-calendar me-2"></i> Date :</p>
+                                <p class="mb-1"><i class="fas fa-car me-2"></i> Véhicule :</p>
+                                <p class="mb-0"><i class="fas fa-users me-2"></i> Places disponibles :</p>
+                                <p class="mb-0"><i class="fas fa-euro-sign me-2"></i> Prix par passager :</p>
                             </div>
-            </div>    
-            <div class="tab-content col-12 col-md-9 col-lg-10" id="v-pills-tabContent">    
-                    <!-- Contenu des onglets -->
-                    <div class="tab-pane fade show active" id="v-pills-trajets" role="tabpanel" aria-labelledby="v-pills-trajets-tab" tabindex="-1">
-                        <h3 class="section-title">Mes trajets</h3>
-                        <ul class="nav nav-tabs" id="myTripsTab">
-                            <li class="nav-item">
-                                <button class="nav-link " id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">Terminé</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link active" id="planned-tab" data-bs-toggle="tab" data-bs-target="#planned" type="button" role="tab">Planifiés</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" id="inprogress-tab" data-bs-toggle="tab" data-bs-target="#inprogress" type="button" role="tab">En cours</button>
-                            </li>
-                        </ul>
-                    
-                        <div class="tab-content mt-4" id="myTripsTabContent">
-                            <!-- Trajets Planifiés -->
-                            <div class="tab-pane fade show active" id="planned" role="tabpanel">
-                                        <div class="row align-items-center" id="planned-trip">
-                                            <div class="col-md-8">
-                                                <h5>Trajet :</h5>
-                                                <p class="mb-1"><i class="far fa-calendar me-2"></i> Date :</p>
-                                                <p class="mb-1"><i class="fas fa-car me-2"></i> Véhicule :</p>
-                                                <p class="mb-0"><i class="fas fa-users me-2"></i> Places disponibles :</p>
-                                                <p class="mb-0"><i class="fas fa-euro-sign me-2"></i> Prix par passager :</p>
-                                            </div>
-                                            <div class="col-md-4 text-md-end">
-                                                <p><span class="trip-status status-planned">Planifié</span></p>
-                                                <div class="mt-2">
-                                                    <button class="btn btn-primary btn-sm">Démarrer</button>
-                                                    <button class="btn btn-outline-danger btn-sm">Annuler</button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="col-md-4 text-md-end">
+                                <p><span class="trip-status status-planned">Planifié</span></p>
+                                <div class="mt-2">
+                                    <button class="btn btn-primary btn-sm">Démarrer</button>
+                                    <button class="btn btn-outline-danger btn-sm">Annuler</button>
+                                </div>
                             </div>
-                            <!-- Trajets En cours -->
-                            <div class="tab-pane fade" id="inprogress" role="tabpanel">
-                                <div class="card">
-                                    <div class="card-body" id="inProgress-trip">
-                                        <div class="row align-items-center">
+                        </div>
+                    </div>
+                    <!-- Trajets En cours -->
+                    <div class="tab-pane fade" id="inprogress" role="tabpanel">
+                        <div class="card">
+                            <div class="card-body" id="inProgress-trip">
+                                <div class="row align-items-center">
                                     <div class="col-md-8">
                                         <h5>Trajet :</h5>
                                         <p class="mb-1"><i class="far fa-calendar me-2"></i> Date : </p>
@@ -66,118 +74,121 @@
                                     <div class="col-md-4 text-md-end">
                                         <span class="trip-status status-completed">Terminé</span>
                                         <div class="mt-2">
-                                            <button class="btn btn-outline-secondary btn-sm details-trip" data-bs-toggle="modal" data-bs-target="#tripDetailsModal" data-id="${trip.id}">Détails</button>
+                                            <button class="btn btn-outline-secondary btn-sm details-trip"
+                                                data-bs-toggle="modal" data-bs-target="#tripDetailsModal"
+                                                data-id="${trip.id}">Détails</button>
                                         </div>
                                     </div>
                                 </div>
-                                    </div>
-                                </div>
                             </div>
-                            <!-- Trajets Terminés -->
-                            <div class="tab-pane fade" id="history" role="tabpanel">
-                                <div class="card">
-                                    <div class="card-body" id="history-trip">
-                                    </div>
-                                </div>
-                            </div>
-                                <!-- Modal pour les détails du trajet -->
-                                <div class="modal fade" id="tripDetailsModal" tabindex="-1" aria-labelledby="tripDetailsModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="tripDetailsModalLabel">Détails du trajet</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                                            </div>
-                                            <div class="modal-body" id="tripDetailsContainer">
-                                                <!-- Les détails du trajet seront insérés ici via JavaScript -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                         </div>
                     </div>
-                    <!-- Onglet ajouter un trajet-->
-                    <div class="tab-pane fade" id="v-pills-create" role="tabpanel" aria-labelledby="v-pills-create-tab" tabindex="-1">
-                                <!-- Proposer un trajet -->
-                        <div class="container mt-4" id="createTripContainer">
-
-                            <div class="mb-4" id ="becomePassengerContainer">
-                                    <div class="text-center mt-3">
-                                        <button class="btn btn-secondary" id="becomePassengerBtn">Rester passager</button>
-                                        <button class="btn btn-primary" id="becomeDriverBtn">Devenir conducteur</button>
-                                    </div>
+                    <!-- Trajets Terminés -->
+                    <div class="tab-pane fade" id="history" role="tabpanel">
+                        <div class="card">
+                            <div class="card-body" id="history-trip">
                             </div>
+                        </div>
+                    </div>
+                    <!-- Modal pour les détails du trajet -->
+                    <div class="modal fade" id="tripDetailsModal" tabindex="-1" aria-labelledby="tripDetailsModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="tripDetailsModalLabel">Détails du trajet</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Fermer"></button>
+                                </div>
+                                <div class="modal-body" id="tripDetailsContainer">
+                                    <!-- Les détails du trajet seront insérés ici via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Onglet ajouter un trajet-->
+            <div class="tab-pane fade" id="v-pills-create" role="tabpanel" aria-labelledby="v-pills-create-tab"
+                tabindex="-1">
+                <!-- Proposer un trajet -->
+                <div class="container mt-4" id="createTripContainer">
 
-                                    <div class="mb-4">
-                                        <div class="card-body" id="createTripFormContainer" style="display: none;">
-                                            <form id="tripForm">  
-                                                <div class="row g-3">
-                                                    <div class="col-md-4 position-relative">
-                                                        <label class="form-label" for="departInput">Départ</label>
-                                                        <input type="text" class="form-control" id="departInput" autocomplete="off" name="adresseDepart" required>
-                                                        <!-- Liste des suggestions OpenStreetMap -->
-                                                        <div id="depart-results" 
-                                                            class="list-group position-absolute w-100">
-                                                        </div>
+                    <div class="mb-4" id="becomePassengerContainer">
+                        <div class="text-center mt-3">
+                            <button class="btn btn-secondary" id="becomePassengerBtn">Rester passager</button>
+                            <button class="btn btn-primary" id="becomeDriverBtn">Devenir conducteur</button>
+                        </div>
+                    </div>
 
-                                                    </div>
+                    <div class="mb-4">
+                        <div class="card-body" id="createTripFormContainer" style="display: none;">
+                            <form id="tripForm">
+                                <div class="row g-3">
+                                    <div class="col-md-4 position-relative">
+                                        <label class="form-label" for="departInput">Départ</label>
+                                        <input type="text" class="form-control" id="departInput" autocomplete="off"
+                                            name="adresseDepart" required>
+                                        <!-- Liste des suggestions OpenStreetMap -->
+                                        <div id="depart-results" class="list-group position-absolute w-100">
+                                        </div>
 
-                                                    <div class="col-md-4 position-relative">
-                                                    <label class="form-label" for="arriveeInput">Arrivée</label>
-                                                    <input type="text" class="form-control" id="arriveeInput" autocomplete="off" required name="adresseArrivee">
-                                                        <!-- Liste des suggestions OpenStreetMap -->
-                                                    <div id="arrivee-results" 
-                                                        class="list-group position-absolute w-100">
-                                                    </div>
-                                                    </div>
-                                                    
-                                                    <div class="col-md-2 position-relative">
-                                                        <label class="form-label" for="datetInput">Date</label>
-                                                        <input type="date" class="form-control" id="datetInput" name="dateDepart" required>
-                                                    <!-- Liste des suggestions OpenStreetMap -->
-                                                        <div id="date-results" class="list-group position-absolute w-100">
-                                                        </div>
-                                                    </div>
-                                                 
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-6">
-                                                            <label for="seats" class="form-label">Places disponibles</label>
-                                                            <input type="number" class="form-control" id="seats" min="1" max="8" value="4" name="placeDisponible">
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label for="price" class="form-label">Prix par passager (€)</label>
-                                                            <input type="number" class="form-control" id="price" min="1" value="20" name="prix">
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="description" class="form-label">Informations complémentaires</label>
-                                                        <textarea class="form-control" id="description" rows="3" name="description" placeholder="Précisez le lieu de rendez-vous, les arrêts possibles, etc."></textarea>
-                                                    </div>
-                                                    <div class="col-md-2 text-end d-grid">
-        
-                                                            <button type="button" class="btn btn-success btn-sm" id="createTripBtn">Proposer
-                                                            </button>
-                                                    </div>
-                                                </div>
-                                                <input 
-                                                    type="hidden" id="latitudeDepart">
-                                                    <input 
-                                                        type="hidden" id="longitudeDepart">
-                                                    <input 
-                                                        type="hidden" id="villeDepart">
-                                                    <input 
-                                                        type="hidden" id="latitudeArrivee">
-                                                    <input 
-                                                        type="hidden" id="longitudeArrivee">
-                                                    <input 
-                                                        type="hidden" id="villeArrivee">
-                                            </form>
+                                    </div>
+
+                                    <div class="col-md-4 position-relative">
+                                        <label class="form-label" for="arriveeInput">Arrivée</label>
+                                        <input type="text" class="form-control" id="arriveeInput" autocomplete="off"
+                                            required name="adresseArrivee">
+                                        <!-- Liste des suggestions OpenStreetMap -->
+                                        <div id="arrivee-results" class="list-group position-absolute w-100">
                                         </div>
                                     </div>
+
+                                    <div class="col-md-2 position-relative">
+                                        <label class="form-label" for="datetInput">Date</label>
+                                        <input type="date" class="form-control" id="datetInput" name="dateDepart"
+                                            required>
+                                        <!-- Liste des suggestions OpenStreetMap -->
+                                        <div id="date-results" class="list-group position-absolute w-100">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="seats" class="form-label">Places disponibles</label>
+                                            <input type="number" class="form-control" id="seats" min="1" max="8"
+                                                value="4" name="placeDisponible">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="price" class="form-label">Prix par passager (€)</label>
+                                            <input type="number" class="form-control" id="price" min="1" value="20"
+                                                name="prix">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Informations complémentaires</label>
+                                        <textarea class="form-control" id="description" rows="3" name="description"
+                                            placeholder="Précisez le lieu de rendez-vous, les arrêts possibles, etc."></textarea>
+                                    </div>
+                                    <div class="col-md-2 text-end d-grid">
+
+                                        <button type="button" class="btn btn-success btn-sm" id="createTripBtn">Proposer
+                                        </button>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="latitudeDepart">
+                                <input type="hidden" id="longitudeDepart">
+                                <input type="hidden" id="villeDepart">
+                                <input type="hidden" id="latitudeArrivee">
+                                <input type="hidden" id="longitudeArrivee">
+                                <input type="hidden" id="villeArrivee">
+                            </form>
                         </div>
-                            
                     </div>
+                </div>
+
             </div>
         </div>
+    </div>
 </div>
 <script src="../js/trajets.js" type="module"></script>

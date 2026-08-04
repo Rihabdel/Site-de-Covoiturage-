@@ -15,7 +15,7 @@ services:
     build: ./FrontendBootstrap
     container_name: Ecoride_bootstrap_front
     ports:
-      - "5173:5173"
+      - "5173:80"
     tty: true  
     volumes:
       - ./FrontendBootstrap:/app
@@ -39,16 +39,11 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
-#  pgadmin:
-#    image: dpage/pgadmin4
-#    container_name: ecoride_pma
-#    ports:
-#      - "8081:80"
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: user@domain.com
-#      PGADMIN_DEFAULT_PASSWORD: password
-#    depends_on:
-#      - database
+  mongodb:
+      image: mongo:7
+      container_name: ecoride
+      ports:
+        - "27017:27017"
 
 volumes:
   symfony_var:
