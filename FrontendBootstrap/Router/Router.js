@@ -5,7 +5,7 @@ import {
   isConnected,
   getRole,
   waitForAuth,
-} from ".../js/auth.js";
+} from "../js/auth.js";
 
 // Création d'une route pour la page 404
 const route404 = new Route(
